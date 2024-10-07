@@ -16,7 +16,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    background = background
+    background = LightThemeColor.background
 )
 
 @Composable
