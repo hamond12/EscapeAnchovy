@@ -7,9 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.hamond.escapeanchovy.constants.Routes.HOME
-import com.hamond.escapeanchovy.constants.Routes.LOGIN
-import com.hamond.escapeanchovy.constants.Routes.SIGNUP
+import com.hamond.escapeanchovy.constants.Routes
 import com.hamond.escapeanchovy.presentation.ui.screens.HomeScreen
 import com.hamond.escapeanchovy.presentation.ui.screens.LoginScreen
 import com.hamond.escapeanchovy.presentation.ui.screens.SignUpScreen
@@ -30,10 +28,10 @@ class MainActivity : ComponentActivity() {
 fun MyApp() {
     val navController = rememberNavController()
     EscapeAnchovyTheme {
-        NavHost(navController = navController, startDestination = LOGIN) {
-            composable(route = LOGIN) { LoginScreen(navController) }
-            composable(route = SIGNUP) { SignUpScreen(navController) }
-            composable(route = HOME) { HomeScreen(navController) }
+        NavHost(navController = navController, startDestination = Routes.LOGIN) {
+            composable(route = Routes.LOGIN) { LoginScreen(navController) }
+            composable(route = Routes.SIGNUP) { SignUpScreen(navController) }
+            composable(route = Routes.HOME) { HomeScreen(navController) }
         }
     }
 }
