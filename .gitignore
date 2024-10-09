@@ -13,3 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
+com/hamond/escapeanchovy/constants/ApiKeys.kt
