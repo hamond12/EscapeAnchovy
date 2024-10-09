@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +48,12 @@ fun MyApp(signInViewModel: SignInViewModel) {
        NavHost(
             navController = navController,
             startDestination = if (uid == null) SIGN_IN else HOME,
+           enterTransition = {
+               EnterTransition.None
+           },
+           exitTransition = {
+               ExitTransition.None
+           }
         ) {
             composable(route = SIGN_IN) { LoginScreen(navController, signInViewModel) }
             composable(route = SIGN_UP) { SignUpScreen(navController) }

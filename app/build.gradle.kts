@@ -72,8 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Compose Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.30.0")
+    implementation("androidx.navigation:navigation-compose:2.7.5")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.52")
