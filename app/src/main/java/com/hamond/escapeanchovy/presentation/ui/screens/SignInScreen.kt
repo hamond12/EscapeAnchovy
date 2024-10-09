@@ -1,5 +1,10 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
+import android.content.Context
+import android.credentials.GetCredentialException
+import android.util.Log
+import android.widget.Toast
+import androidx.credentials.Credential
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,37 +15,86 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+import com.google.firebase.Firebase
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
 import com.hamond.escapeanchovy.R
+import com.hamond.escapeanchovy.constants.ApiKeys.GOOGLE_CLIENT_ID
+import com.hamond.escapeanchovy.constants.Routes
 import com.hamond.escapeanchovy.presentation.ui.components.CustomButton
 import com.hamond.escapeanchovy.presentation.ui.components.CustomCheckbox
 import com.hamond.escapeanchovy.presentation.ui.components.CustomTextField
 import com.hamond.escapeanchovy.presentation.ui.components.Divider
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
+import com.hamond.escapeanchovy.presentation.viewmodel.SignInViewModel
 import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b3_bold
 import com.hamond.escapeanchovy.ui.theme.b3_regular
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 import com.hamond.escapeanchovy.ui.theme.h1_bold
+import com.hamond.escapeanchovy.utils.AccountUtils.saveUid
+import com.hamond.escapeanchovy.utils.CommonUtils.showToast
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewModel) {
 
-    //val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val loginResult by signInViewModel.loginResult.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    LaunchedEffect(loginResult) {
+        loginResult?.let { result ->
+            if (result.isSuccess) {
+                saveUid(context, result.getOrNull() ?: "")
+                signInViewModel.initLoginResult()
+                navController.navigate(Routes.HOME) {
+                    popUpTo(Routes.SIGN_IN) { inclusive = true }
+                }
+            } else {
+                showToast(context, "로그인 에러가 발생하였습니다.")
+                Log.e("LoginError", "${result.exceptionOrNull()}")
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var isAutoLogin by remember { mutableStateOf(false) }
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -57,9 +111,20 @@ fun LoginScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.size(60.dp))
-            EmailTextField()
+            CustomTextField(
+                value = email,
+                onValueChange = { email = it },
+                drawableId = R.drawable.ic_email,
+                placeholder = "이메일 입력",
+            )
             Spacer(modifier = Modifier.size(20.dp))
-            PasswordTextField()
+            CustomTextField(
+                value = password,
+                onValueChange = { password = it },
+                drawableId = R.drawable.ic_password,
+                placeholder = "비밀번호 입력",
+                isPassword = true
+            )
             Spacer(modifier = Modifier.size(26.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -69,7 +134,10 @@ fun LoginScreen(navController: NavHostController) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AutoLoginCheckbox()
+                    CustomCheckbox(
+                        isChecked = isAutoLogin,
+                        onCheckedChange = { isAutoLogin = it },
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "자동 로그인", style = b4_regular.copy(LightThemeColor.subText))
                 }
@@ -116,7 +184,9 @@ fun LoginScreen(navController: NavHostController) {
         }
         Spacer(modifier = Modifier.size(40.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {})
+            Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
+                signInViewModel.signInWithGoogle()
+            })
             Spacer(modifier = Modifier.size(34.dp))
             Svg(drawableId = R.drawable.ic_kakao, size = 50, onClick = {})
             Spacer(modifier = Modifier.size(34.dp))
@@ -125,41 +195,8 @@ fun LoginScreen(navController: NavHostController) {
     }
 }
 
-@Composable
-fun EmailTextField() {
-    var text by remember { mutableStateOf("") }
-    CustomTextField(
-        value = text,
-        onValueChange = { text = it },
-        drawableId = R.drawable.ic_email,
-        placeholder = "이메일 입력",
-    )
-}
-
-@Composable
-fun PasswordTextField() {
-    var text by remember { mutableStateOf("") }
-    CustomTextField(
-        value = text,
-        onValueChange = { text = it },
-        drawableId = R.drawable.ic_password,
-        placeholder = "비밀번호 입력",
-        isPassword = true
-    )
-}
-
-@Composable
-fun AutoLoginCheckbox() {
-    var isChecked by remember { mutableStateOf(false) }
-    CustomCheckbox(
-        isChecked = isChecked,
-        onCheckedChange = { isChecked = it },
-    )
-}
-
-
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewSimpleScreen() {
-    LoginScreen(rememberNavController())
+    LoginScreen(rememberNavController(),  viewModel())
 }

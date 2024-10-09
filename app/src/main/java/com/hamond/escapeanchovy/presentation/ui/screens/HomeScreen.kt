@@ -1,22 +1,28 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import com.hamond.escapeanchovy.constants.Routes.LOGIN
-import com.hamond.escapeanchovy.ui.theme.h1_bold
+import com.hamond.escapeanchovy.constants.Routes
+import com.hamond.escapeanchovy.utils.AccountUtils.getUid
+import com.hamond.escapeanchovy.utils.AccountUtils.removeUid
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
+
+    val context = LocalContext.current
+
+    //val uid = getUid(context)
+
     Column(
         modifier = Modifier.fillMaxSize(),
 
@@ -25,9 +31,12 @@ fun HomeScreen(navController: NavHostController) {
     ) {
         Text(text = "Home Screen")
         Button(onClick = {
-            navController.navigate(LOGIN) // 로그인 화면으로 돌아가기
+            removeUid(context)
+            navController.navigate(Routes.SIGN_IN) {
+                popUpTo(Routes.HOME) { inclusive = true }
+            }
         }) {
-            Text(text = "Go to Login")
+            Text(text = "Log Out")
         }
     }
 }

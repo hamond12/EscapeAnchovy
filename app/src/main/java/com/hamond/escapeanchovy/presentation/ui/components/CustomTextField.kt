@@ -30,6 +30,7 @@ fun CustomTextField(
     drawableId: Int,
     placeholder: String,
     isPassword: Boolean = false,
+    maxLength: Int = 20
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -41,8 +42,13 @@ fun CustomTextField(
             BasicTextField(
                 value = value,
                 textStyle = b4_regular,
-                onValueChange = onValueChange,
+                onValueChange = {
+                    if (it.length <= maxLength) {
+                        onValueChange(it)
+                    }
+                },
                 maxLines = 1,
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
