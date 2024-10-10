@@ -1,4 +1,4 @@
-package com.hamond.escapeanchovy.data.di
+package com.hamond.escapeanchovy.data.remote
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

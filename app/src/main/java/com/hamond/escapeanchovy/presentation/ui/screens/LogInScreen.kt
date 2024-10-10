@@ -1,6 +1,5 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,21 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.google.firebase.Firebase
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.constants.ApiKeys.GOOGLE_CLIENT_ID
 import com.hamond.escapeanchovy.constants.Routes
 import com.hamond.escapeanchovy.presentation.ui.components.CustomButton
 import com.hamond.escapeanchovy.presentation.ui.components.CustomCheckbox
@@ -59,7 +46,6 @@ import com.hamond.escapeanchovy.ui.theme.h1_bold
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUid
 import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import com.hamond.escapeanchovy.utils.CommonUtils.showToast
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewModel) {
@@ -111,36 +97,16 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
                 Spacer(modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.size(60.dp))
-            CustomTextField(
-                value = email,
-                onValueChange = { email = it },
-                drawableId = R.drawable.ic_email,
-                placeholder = "이메일 입력",
-            )
+            EmailTextField(email = email, onEmailChange = { email = it })
             Spacer(modifier = Modifier.size(20.dp))
-            CustomTextField(
-                value = password,
-                onValueChange = { password = it },
-                drawableId = R.drawable.ic_password,
-                placeholder = "비밀번호 입력",
-                isPassword = true
-            )
+            PasswordTextField(password = password, onPasswordChange = { password = it })
             Spacer(modifier = Modifier.size(26.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CustomCheckbox(
-                        isChecked = isAutoLogin,
-                        onCheckedChange = { isAutoLogin = it },
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "자동 로그인", style = b4_regular.copy(LightThemeColor.subText))
-                }
+                AutoLoginCheckbox(isChecked = isAutoLogin, onCheckedChange = { isAutoLogin = it })
                 Column(horizontalAlignment = Alignment.End) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -153,16 +119,16 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
                 }
             }
             Spacer(modifier = Modifier.size(40.dp))
-            CustomButton(
-                text = "로그인",
-                onClick = { },
-                backgroundColor = LightThemeColor.skyblue
+            LoginButton(
+                onClick = {
+                    // 로그인 처리 로직
+                }
             )
             Spacer(modifier = Modifier.size(20.dp))
-            CustomButton(
-                text = "회원가입",
-                onClick = { },
-                backgroundColor = LightThemeColor.orange
+            SignUpButton(
+                onClick = {
+                    // 회원가입 처리 로직
+                }
             )
         }
         Spacer(modifier = Modifier.size(60.dp))
@@ -183,15 +149,10 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
             Divider(width = 80, color = LightThemeColor.hint)
         }
         Spacer(modifier = Modifier.size(40.dp))
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
-                signInViewModel.googleLogin()
-            })
-            Spacer(modifier = Modifier.size(34.dp))
-            Svg(drawableId = R.drawable.ic_kakao, size = 50, onClick = {})
-            Spacer(modifier = Modifier.size(34.dp))
-            Svg(drawableId = R.drawable.ic_naver, size = 50, onClick = {})
-        }
+        SocialLoginButtons(
+            onGoogleLoginClick = { signInViewModel.googleLogin() },
+            onKakaoLoginClick = { /* 카카오 로그인 처리 */ },
+            onNaverLoginClick = { /* 네이버 로그인 처리 */ })
     }
 }
 
@@ -201,55 +162,77 @@ fun PreviewSimpleScreen() {
     LoginScreen(rememberNavController(), viewModel())
 }
 
-
 @Composable
-fun GoogleLoginButton(navController: NavHostController) {
-    val context = LocalContext.current
-    val corutineScope = rememberCoroutineScope()
-    val credentialManager = CredentialManager.create(context)
-
-    Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
-
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setAutoSelectEnabled(true)
-            .setServerClientId(GOOGLE_CLIENT_ID).build()
-
-        val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
-
-        corutineScope.launch {
-            val result = credentialManager.getCredential(
-                request = request,
-                context = context
-            )
-            handleSignIn(result, navController, context)
-        }
-    })
+fun EmailTextField(email: String, onEmailChange: (String) -> Unit) {
+    CustomTextField(
+        value = email,
+        onValueChange = { onEmailChange(it) },
+        drawableId = R.drawable.ic_email,
+        placeholder = "이메일 입력",
+    )
 }
 
-private fun handleSignIn(
-    result: GetCredentialResponse,
-    navController: NavHostController,
-    context: Context
+@Composable
+fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
+    CustomTextField(
+        value = password,
+        onValueChange = { onPasswordChange(it) },
+        drawableId = R.drawable.ic_password,
+        placeholder = "비밀번호 입력",
+        isPassword = true
+    )
+}
+
+@Composable
+fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CustomCheckbox(
+            isChecked = isChecked,
+            onCheckedChange = { onCheckedChange(it) },
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = "자동 로그인", style = b4_regular.copy(LightThemeColor.subText))
+    }
+}
+
+@Composable
+fun LoginButton(onClick: () -> Unit) {
+    CustomButton(
+        text = "로그인",
+        onClick = onClick,
+        backgroundColor = LightThemeColor.skyblue
+    )
+}
+
+@Composable
+fun SignUpButton(onClick: () -> Unit) {
+    CustomButton(
+        text = "회원가입",
+        onClick = onClick,
+        backgroundColor = LightThemeColor.orange
+    )
+}
+
+
+@Composable
+fun SocialLoginButtons(
+    onGoogleLoginClick: () -> Unit,
+    onKakaoLoginClick: () -> Unit,
+    onNaverLoginClick: () -> Unit
 ) {
-    val auth = Firebase.auth
-    when (val credential = result.credential) {
-        is CustomCredential -> {
-            if (credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                val idToken = googleIdTokenCredential.idToken
-                val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-                auth.signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        saveUid(context, auth.currentUser!!.uid)
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
-                    } else {
-                        Log.e("GoogleLoginError", "${task.exception}")
-                    }
-                }
-            }
-        }
+    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+        Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
+            onGoogleLoginClick()
+        })
+        Spacer(modifier = Modifier.size(34.dp))
+        Svg(drawableId = R.drawable.ic_kakao, size = 50, onClick = {
+            onKakaoLoginClick()
+        })
+        Spacer(modifier = Modifier.size(34.dp))
+        Svg(drawableId = R.drawable.ic_naver, size = 50, onClick = {
+            onNaverLoginClick()
+        })
     }
 }
