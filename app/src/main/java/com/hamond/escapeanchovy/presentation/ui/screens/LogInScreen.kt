@@ -1,10 +1,7 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.content.Context
-import android.credentials.GetCredentialException
 import android.util.Log
-import android.widget.Toast
-import androidx.credentials.Credential
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,6 +57,7 @@ import com.hamond.escapeanchovy.ui.theme.b3_regular
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 import com.hamond.escapeanchovy.ui.theme.h1_bold
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUid
+import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import com.hamond.escapeanchovy.utils.CommonUtils.showToast
 import kotlinx.coroutines.launch
 
@@ -70,13 +67,20 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
     val context = LocalContext.current
     val loginResult by signInViewModel.loginResult.collectAsState()
 
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    var isSocialLogin by remember { mutableStateOf(true) }
+    var isAutoLogin by remember { mutableStateOf(false) }
+
     LaunchedEffect(loginResult) {
         loginResult?.let { result ->
             if (result.isSuccess) {
+                if (isSocialLogin || isAutoLogin) setAutoLogin(context)
                 saveUid(context, result.getOrNull() ?: "")
                 signInViewModel.initLoginResult()
                 navController.navigate(Routes.HOME) {
-                    popUpTo(Routes.SIGN_IN) { inclusive = true }
+                    popUpTo(Routes.LOGIN) { inclusive = true }
                 }
             } else {
                 showToast(context, "로그인 에러가 발생하였습니다.")
@@ -91,10 +95,6 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var isAutoLogin by remember { mutableStateOf(false) }
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -185,7 +185,7 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
         Spacer(modifier = Modifier.size(40.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
-                signInViewModel.signInWithGoogle()
+                signInViewModel.googleLogin()
             })
             Spacer(modifier = Modifier.size(34.dp))
             Svg(drawableId = R.drawable.ic_kakao, size = 50, onClick = {})
@@ -198,5 +198,58 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewSimpleScreen() {
-    LoginScreen(rememberNavController(),  viewModel())
+    LoginScreen(rememberNavController(), viewModel())
+}
+
+
+@Composable
+fun GoogleLoginButton(navController: NavHostController) {
+    val context = LocalContext.current
+    val corutineScope = rememberCoroutineScope()
+    val credentialManager = CredentialManager.create(context)
+
+    Svg(drawableId = R.drawable.ic_google, size = 50, onClick = {
+
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(true)
+            .setServerClientId(GOOGLE_CLIENT_ID).build()
+
+        val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
+
+        corutineScope.launch {
+            val result = credentialManager.getCredential(
+                request = request,
+                context = context
+            )
+            handleSignIn(result, navController, context)
+        }
+    })
+}
+
+private fun handleSignIn(
+    result: GetCredentialResponse,
+    navController: NavHostController,
+    context: Context
+) {
+    val auth = Firebase.auth
+    when (val credential = result.credential) {
+        is CustomCredential -> {
+            if (credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                val idToken = googleIdTokenCredential.idToken
+                val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                auth.signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        saveUid(context, auth.currentUser!!.uid)
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    } else {
+                        Log.e("GoogleLoginError", "${task.exception}")
+                    }
+                }
+            }
+        }
+    }
 }
