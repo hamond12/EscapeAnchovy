@@ -5,5 +5,5 @@ import com.google.firebase.auth.AuthCredential
 
 // Data Layer
 interface AuthRepository {
-    suspend fun googleSignIn(result: GetCredentialResponse): Result<String>
+    suspend fun googleLogin(result: GetCredentialResponse): Result<String>
 }

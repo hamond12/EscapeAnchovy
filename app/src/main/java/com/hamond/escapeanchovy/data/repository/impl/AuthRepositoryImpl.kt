@@ -15,7 +15,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : AuthRepository {
 
-    override suspend fun googleSignIn(result: GetCredentialResponse): Result<String> {
+    override suspend fun googleLogin(result: GetCredentialResponse): Result<String> {
         val credential = result.credential
         return if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
