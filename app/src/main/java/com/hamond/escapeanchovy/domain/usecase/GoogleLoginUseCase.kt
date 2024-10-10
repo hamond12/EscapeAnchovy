@@ -1,6 +1,7 @@
 package com.hamond.escapeanchovy.domain.usecase
 
 import androidx.credentials.GetCredentialResponse
+import com.google.firebase.auth.AuthCredential
 import com.hamond.escapeanchovy.domain.repository.AuthRepository
 import javax.inject.Inject
 
