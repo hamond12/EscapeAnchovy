@@ -29,7 +29,7 @@ object AccountUtils{
     }
 
     // 로그아웃할 때 호출
-    fun removeAutoLogin(context: Context) {
+    fun cancelAutoLogin(context: Context) {
         val prefs = context.getSharedPreferences(ACCOUNT_PREFS, 0)
         prefs.edit { remove(AUTO_LOGIN) }
     }

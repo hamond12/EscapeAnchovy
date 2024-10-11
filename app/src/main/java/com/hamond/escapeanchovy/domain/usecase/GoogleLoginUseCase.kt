@@ -8,7 +8,10 @@ import javax.inject.Inject
 class GoogleLoginUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(result: GetCredentialResponse): Result<String> {
-        return authRepository.googleLogin(result)
+    operator fun invoke(
+        firebaseCredential: AuthCredential,
+        callback: (Boolean, String?) -> Unit
+    ){
+        authRepository.googleLogin(firebaseCredential, callback)
     }
 }

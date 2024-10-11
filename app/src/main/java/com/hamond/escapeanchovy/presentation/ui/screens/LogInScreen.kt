@@ -63,7 +63,7 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
         loginResult?.let { result ->
             if (result.isSuccess) {
                 if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                saveUid(context, result.getOrNull() ?: "")
+                saveUid(context, result.getOrNull()!!)
                 signInViewModel.initLoginResult()
                 navController.navigate(Routes.HOME) {
                     popUpTo(Routes.LOGIN) { inclusive = true }
@@ -153,6 +153,7 @@ fun LoginScreen(navController: NavHostController, signInViewModel: SignInViewMod
             onGoogleLoginClick = { signInViewModel.googleLogin() },
             onKakaoLoginClick = { /* 카카오 로그인 처리 */ },
             onNaverLoginClick = { /* 네이버 로그인 처리 */ })
+        Spacer(modifier = Modifier.size(40.dp))
     }
 }
 

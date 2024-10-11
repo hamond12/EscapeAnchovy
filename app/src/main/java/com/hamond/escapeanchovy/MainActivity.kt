@@ -45,7 +45,6 @@ fun MyApp(signInViewModel: SignInViewModel) {
     NavHost(
         navController = navController,
         startDestination = if (autoLogin) HOME else LOGIN,
-        //enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
         composable(route = LOGIN) { LoginScreen(navController, signInViewModel) }
