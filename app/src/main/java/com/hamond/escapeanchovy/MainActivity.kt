@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -17,25 +16,23 @@ import com.hamond.escapeanchovy.constants.Routes.SIGN_UP
 import com.hamond.escapeanchovy.presentation.ui.screens.HomeScreen
 import com.hamond.escapeanchovy.presentation.ui.screens.LoginScreen
 import com.hamond.escapeanchovy.presentation.ui.screens.SignUpScreen
-import com.hamond.escapeanchovy.presentation.viewmodel.SignInViewModel
+import com.hamond.escapeanchovy.presentation.viewmodel.LogInViewModel
 import com.hamond.escapeanchovy.utils.AccountUtils.getAutoLogin
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val signInViewModel: SignInViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyApp(signInViewModel)
+            MyApp()
         }
     }
 }
 
 @Composable
-fun MyApp(signInViewModel: SignInViewModel) {
+fun MyApp() {
 
     val navController = rememberNavController()
 
@@ -47,7 +44,7 @@ fun MyApp(signInViewModel: SignInViewModel) {
         startDestination = if (autoLogin) HOME else LOGIN,
         exitTransition = { ExitTransition.None }
     ) {
-        composable(route = LOGIN) { LoginScreen(navController, signInViewModel) }
+        composable(route = LOGIN) { LoginScreen(navController) }
         composable(route = SIGN_UP) { SignUpScreen(navController) }
         composable(route = HOME) { HomeScreen(navController) }
     }

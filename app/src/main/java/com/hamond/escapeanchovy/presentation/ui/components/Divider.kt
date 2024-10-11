@@ -1,6 +1,5 @@
 package com.hamond.escapeanchovy.presentation.ui.components
 
-import android.icu.text.ListFormatter.Width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider

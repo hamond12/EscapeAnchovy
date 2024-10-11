@@ -35,6 +35,48 @@ val h1_regular = TextStyle(
     lineHeight = 36.sp,
 )
 
+val h2_bold = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Bold,
+    fontSize = 24.sp,
+    lineHeight = 32.sp,
+)
+
+val h2_medium = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Medium,
+    fontSize = 24.sp,
+    lineHeight = 32.sp,
+)
+
+val h2_regular = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Normal,
+    fontSize = 24.sp,
+    lineHeight = 32.sp,
+)
+
+val b2_bold = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Bold,
+    fontSize = 16.sp,
+    lineHeight = 22.sp,
+)
+
+val b2_medium = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Medium,
+    fontSize = 16.sp,
+    lineHeight = 22.sp,
+)
+
+val b2_regular = TextStyle(
+    fontFamily = pretendard,
+    fontWeight = FontWeight.Normal,
+    fontSize = 16.sp,
+    lineHeight = 22.sp,
+)
+
 val b3_bold = TextStyle(
     fontFamily = pretendard,
     fontWeight = FontWeight.Bold,

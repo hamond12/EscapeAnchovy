@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 
-
 @Composable
 fun CustomTextField(
     value: String,
