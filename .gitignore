@@ -13,4 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-com/hamond/escapeanchovy/constants/ApiKeys.kt
+
+# Ignore the Secret file in the specified package
+app/src/main/java/com/hamond/escapeanchovy/constants/Secret.kt

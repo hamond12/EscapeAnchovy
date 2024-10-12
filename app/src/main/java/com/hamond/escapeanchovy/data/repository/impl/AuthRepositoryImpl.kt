@@ -14,7 +14,11 @@ class AuthRepositoryImpl @Inject constructor(
     ) {
         val authResult = firebaseAuth.signInWithCredential(firebaseCredential)
         authResult.addOnSuccessListener {
-            callback(true, it.user?.uid)
+            /* TODO: User 클래스 만들어서 스토어에 저장 */
+            val user = it.user
+            val name = user?.displayName
+            val email = user?.email
+            callback(true, user?.uid)
         }.addOnFailureListener {
             callback(false, it.message)
         }
