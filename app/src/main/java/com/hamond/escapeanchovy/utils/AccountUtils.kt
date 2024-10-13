@@ -11,13 +11,13 @@ object AccountUtils{
     const val AUTO_LOGIN = "auto_login"
 
     // 로그인 시 호출
-    fun saveUid(context: Context, uid:String) {
+    fun saveUserEmail(context: Context, uid:String) {
         val prefs = context.getSharedPreferences(ACCOUNT_PREFS, 0)
         prefs.edit { putString(UID, uid) }
     }
 
     // 유저정보를 저장하거나 가져오는 로직에서 호출 (uid 기반으로 document 가져옴)
-    fun getUid(context: Context): String? {
+    fun getUserEmail(context: Context): String? {
         val prefs = context.getSharedPreferences(ACCOUNT_PREFS, 0)
         return prefs.getString(UID, null)
     }

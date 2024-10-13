@@ -49,7 +49,7 @@ import com.hamond.escapeanchovy.ui.theme.b3_bold
 import com.hamond.escapeanchovy.ui.theme.b3_regular
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 import com.hamond.escapeanchovy.ui.theme.h1_bold
-import com.hamond.escapeanchovy.utils.AccountUtils.saveUid
+import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
 import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import com.hamond.escapeanchovy.utils.CommonUtils.showToast
 import kotlinx.coroutines.launch
@@ -60,6 +60,7 @@ fun LoginScreen(
     loginViewModel: LogInViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val loginResult by loginViewModel.loginResult.collectAsState()
 
     var email by remember { mutableStateOf("") }
@@ -74,7 +75,7 @@ fun LoginScreen(
         loginResult?.let { result ->
             if (result.isSuccess) {
                 if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                saveUid(context, result.getOrNull()!!)
+                saveUserEmail(context, result.getOrNull()!!)
                 loginViewModel.initLoginResult()
                 navController.navigate(Routes.HOME) {
                     popUpTo(Routes.LOGIN) { inclusive = true }
@@ -175,8 +176,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.size(40.dp))
 
-        val coroutineScope = rememberCoroutineScope()
-
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
@@ -196,7 +195,9 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            KakaoLoginButton(onClick = {})
+            KakaoLoginButton(onClick = {
+                //loginViewModel.kakaoLogin()
+            })
 
             Spacer(modifier = Modifier.size(40.dp))
 
