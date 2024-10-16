@@ -24,7 +24,7 @@ fun HomeScreen(navController: NavHostController) {
 
     val context = LocalContext.current
 
-    val email = getUserEmail(context)!!
+    //val email = getUserEmail(context)!!
 
     var userName by remember { mutableStateOf("") }
 
@@ -45,13 +45,13 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 
-    getUserNameByEmail(email) { name, error ->
-        if (error == null) {
-            userName = name!!
-        } else {
-            // 에러처리
-        }
-    }
+//    getUserNameByEmail(email) { name, error ->
+//        if (error == null) {
+//            //userName = name!!
+//        } else {
+//            // 에러처리
+//        }
+//    }
 
 }
 

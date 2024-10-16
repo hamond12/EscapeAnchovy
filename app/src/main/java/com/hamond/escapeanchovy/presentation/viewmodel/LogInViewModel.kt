@@ -1,23 +1,17 @@
 package com.hamond.escapeanchovy.presentation.viewmodel
 
 import android.app.Application
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import android.provider.Settings.ACTION_ADD_ACCOUNT
+import android.provider.Settings.EXTRA_ACCOUNT_TYPES
 import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.AndroidViewModel
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.google.firebase.auth.GoogleAuthProvider
-import com.hamond.escapeanchovy.BuildConfig
-import com.hamond.escapeanchovy.domain.usecase.GoogleLoginUseCase
-import com.hamond.escapeanchovy.domain.usecase.SaveSocialAccountInfoUseCase
-import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.common.model.ClientError
-import com.kakao.sdk.common.model.ClientErrorCause
-import com.kakao.sdk.user.UserApiClient
+import com.hamond.escapeanchovy.data.model.User
+import com.hamond.escapeanchovy.data.repository.googleLogin.GoogleLoginRepository
+import com.hamond.escapeanchovy.data.repository.kakaoLogin.KakaoLoginRepository
+import com.hamond.escapeanchovy.data.repository.store.StoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,73 +20,61 @@ import javax.inject.Inject
 @HiltViewModel
 class LogInViewModel @Inject constructor(
     application: Application,
-    private val googleLoginUseCase: GoogleLoginUseCase,
-    private val saveSocialAccountInfoUseCase: SaveSocialAccountInfoUseCase
+    private val googleLoginRepository: GoogleLoginRepository,
+    private val kakaoLoginRepository: KakaoLoginRepository,
+    private val storeRepository: StoreRepository
 ) : AndroidViewModel(application) {
 
-    companion object{
-        const val TAG = "kakaoLogin"
-    }
+    private val context: Context by lazy { application.applicationContext }
 
-    private val context = application.applicationContext
-
-    private val _loginResult = MutableStateFlow<Result<String?>?>(null)
+    private val _loginResult = MutableStateFlow<Result<String>?>(null)
     val loginResult: StateFlow<Result<String?>?> get() = _loginResult
+
+    fun openGoogleAccountSetting(){
+        val intent = Intent(ACTION_ADD_ACCOUNT)
+        intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
 
     suspend fun googleLogin(
         onFailure: () -> Unit
     ) {
         val credentialManager = CredentialManager.create(context)
-        val request = createCredentialRequest()
+        val request = googleLoginRepository.createCredentialRequest()
 
         runCatching {
             credentialManager.getCredential(request = request, context = context)
-        }.onSuccess { credentialResponse ->
-            handleGoogleLoginState(credentialResponse)
+        }.onSuccess {
+            performGoogleLogin(it)
         }.onFailure {
             onFailure()
         }
     }
 
-    private fun createCredentialRequest(): GetCredentialRequest {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // 모든 Google 계정 포함
-            .setAutoSelectEnabled(true) // Google 계정을 자동으로 선택
-            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
-            .build()
-
-        return GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+    private suspend fun performGoogleLogin(result: GetCredentialResponse) {
+        try {
+            val credential = googleLoginRepository.checkCredentialType(result) // 자격 증명 확인
+            val user = googleLoginRepository.signInWithCredential(credential) // 자격 증명으로 로그인
+            handleLoginSuccess(user)
+        } catch (e: Exception) {
+            _loginResult.value = Result.failure(e)
+        }
     }
 
-    private fun handleGoogleLoginState(result: GetCredentialResponse) {
-        when (val credential = result.credential) {
-            is CustomCredential -> {
-                if (credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    val googleIdTokenCredential =
-                        GoogleIdTokenCredential.createFrom(credential.data)
-                    val idToken = googleIdTokenCredential.idToken
-                    val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-                    googleLoginUseCase.invoke(firebaseCredential) { error, user ->
-                        if (error == null) {
-                            saveSocialAccountInfoUseCase.invoke(user) { error ->
-                                if (error == null) {
-                                    _loginResult.value = Result.success(user?.email)
-                                } else {
-                                    _loginResult.value = Result.failure(Exception(error))
-                                }
-                            }
-                        } else {
-                            _loginResult.value = Result.failure(Exception(error))
-                        }
-                    }
-                } else {
-                    _loginResult.value = Result.failure(Exception("Unsupported credential type"))
-                }
-            }
-            else -> _loginResult.value = Result.failure(Exception("Invalid credential type"))
+    suspend fun kakaoLogin() {
+        try {
+            kakaoLoginRepository.loginWithKakaoAccount(context)
+            val user = kakaoLoginRepository.getKakaoUser()
+            handleLoginSuccess(user)
+        } catch (e: Exception) {
+            _loginResult.value = Result.failure(e)
         }
+    }
+
+    private suspend fun handleLoginSuccess(user: User){
+        storeRepository.saveAccountInfo(user) // 계정 정보 저장
+        _loginResult.value = Result.success(user.email) // 로그인 결과 성공 처리
     }
 
     fun initLoginResult() {

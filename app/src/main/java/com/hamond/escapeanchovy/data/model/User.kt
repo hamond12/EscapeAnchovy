@@ -1,4 +1,4 @@
-package com.hamond.escapeanchovy.domain.model
+package com.hamond.escapeanchovy.data.model
 
 data class User(
     val email: String,

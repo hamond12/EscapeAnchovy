@@ -1,8 +1,5 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
-import android.content.Intent
-import android.provider.Settings.ACTION_ADD_ACCOUNT
-import android.provider.Settings.EXTRA_ACCOUNT_TYPES
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -184,19 +181,13 @@ fun LoginScreen(
                     )
                 }
             })
-            GoogleAccountSettingDialog(
-                isOpen = isGoogleAccountSettingDialogOpen,
-                onDismiss = { isGoogleAccountSettingDialogOpen = false },
-                onConfirm = {
-                    val intent = Intent(ACTION_ADD_ACCOUNT)
-                    intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
-                    context.startActivity(intent)
-                })
 
             Spacer(modifier = Modifier.size(40.dp))
 
             KakaoLoginButton(onClick = {
-                //loginViewModel.kakaoLogin()
+                coroutineScope.launch {
+                    loginViewModel.kakaoLogin()
+                }
             })
 
             Spacer(modifier = Modifier.size(40.dp))
@@ -205,9 +196,14 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.size(40.dp))
-
-
     }
+
+    GoogleAccountSettingDialog(
+        isOpen = isGoogleAccountSettingDialogOpen,
+        onDismiss = { isGoogleAccountSettingDialogOpen = false },
+        onConfirm = {
+            loginViewModel.openGoogleAccountSetting()
+        })
 }
 
 

@@ -1,7 +1,5 @@
-package com.hamond.escapeanchovy.data.repository.module
+package com.hamond.escapeanchovy.data.repository.store
 
-import com.hamond.escapeanchovy.data.repository.impl.StoreRepositoryImpl
-import com.hamond.escapeanchovy.domain.repository.StoreRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
