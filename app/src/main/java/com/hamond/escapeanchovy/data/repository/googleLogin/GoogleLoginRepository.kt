@@ -8,5 +8,5 @@ import com.hamond.escapeanchovy.data.model.User
 interface GoogleLoginRepository {
     fun createCredentialRequest(): GetCredentialRequest
     fun checkCredentialType(result: GetCredentialResponse): AuthCredential
-    suspend fun signInWithCredential(firebaseCredential: AuthCredential): User
+    suspend fun loginWithCredential(firebaseCredential: AuthCredential): User
 }

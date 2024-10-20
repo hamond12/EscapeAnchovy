@@ -48,7 +48,7 @@ class GoogleLoginRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signInWithCredential(firebaseCredential: AuthCredential): User {
+    override suspend fun loginWithCredential(firebaseCredential: AuthCredential): User {
         return try {
             val authResult = auth.signInWithCredential(firebaseCredential).await()
             val email = authResult.user?.email ?: ""

@@ -177,6 +177,7 @@ fun LoginScreen(
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
                     loginViewModel.googleLogin(
+                        context,
                         onFailure = { isGoogleAccountSettingDialogOpen = true }
                     )
                 }
@@ -186,13 +187,17 @@ fun LoginScreen(
 
             KakaoLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.kakaoLogin()
+                    loginViewModel.kakaoLogin(context)
                 }
             })
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            NaverLoginButton(onClick = {})
+            NaverLoginButton(onClick = {
+                coroutineScope.launch {
+                    loginViewModel.naverLogin(context)
+                }
+            })
         }
 
         Spacer(modifier = Modifier.size(40.dp))
@@ -202,7 +207,7 @@ fun LoginScreen(
         isOpen = isGoogleAccountSettingDialogOpen,
         onDismiss = { isGoogleAccountSettingDialogOpen = false },
         onConfirm = {
-            loginViewModel.openGoogleAccountSetting()
+            loginViewModel.openGoogleAccountSetting(context)
         })
 }
 
