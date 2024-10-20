@@ -1,6 +1,5 @@
-package com.hamond.escapeanchovy.presentation.ui.screens
+package com.hamond.escapeanchovy.presentation.preview
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,72 +14,26 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.constants.Routes
-import com.hamond.escapeanchovy.presentation.ui.components.CustomAlertDialog
 import com.hamond.escapeanchovy.presentation.ui.components.CustomButton
 import com.hamond.escapeanchovy.presentation.ui.components.CustomCheckbox
 import com.hamond.escapeanchovy.presentation.ui.components.CustomTextField
 import com.hamond.escapeanchovy.presentation.ui.components.Divider
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
-import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b3_bold
 import com.hamond.escapeanchovy.ui.theme.b3_regular
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 import com.hamond.escapeanchovy.ui.theme.h1_bold
-import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
-import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
-import com.hamond.escapeanchovy.utils.CommonUtils.showToast
-import kotlinx.coroutines.launch
 
+@Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
-fun LoginScreen(
-    navController: NavHostController,
-) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    val loginViewModel = hiltViewModel<LoginViewModel>()
-    val loginResult by loginViewModel.loginResult.collectAsState()
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    var isSocialLogin by remember { mutableStateOf(true) }
-    var isAutoLogin by remember { mutableStateOf(false) }
-
-    var isGoogleAccountSettingDialogOpen by remember { mutableStateOf(false) }
-
-    LaunchedEffect(loginResult) {
-        loginResult?.let { result ->
-            if (result.isSuccess) {
-                if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                saveUserEmail(context, result.getOrNull()!!)
-                loginViewModel.initLoginResult()
-                navController.navigate(Routes.HOME) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
-                }
-            } else {
-                showToast(context, "로그인 에러가 발생하였습니다.")
-                Log.e("LoginError", "${result.exceptionOrNull()}")
-            }
-        }
-    }
-
+fun PreviewLoginScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -106,11 +59,11 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.size(60.dp))
 
-            EmailTextField(email = email, onEmailChange = { email = it })
+            EmailTextField(email = "", onEmailChange = { })
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            PasswordTextField(password = password, onPasswordChange = { password = it })
+            PasswordTextField(password = "", onPasswordChange = {})
 
             Spacer(modifier = Modifier.size(26.dp))
 
@@ -119,12 +72,11 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AutoLoginCheckbox(isChecked = isAutoLogin, onCheckedChange = { isAutoLogin = it })
+                AutoLoginCheckbox(isChecked = false, onCheckedChange = {})
                 Column(horizontalAlignment = Alignment.End) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "이메일 찾기 / 비밀번호 재설정",
-                        style = b4_regular.copy(
+                        text = "이메일 찾기 / 비밀번호 재설정", style = b4_regular.copy(
                             color = LightThemeColor.subText,
                         )
                     )
@@ -134,20 +86,11 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            LoginButton(
-                onClick = {
-                    // 로그인 처리 로직
-                    isSocialLogin = false
-                }
-            )
+            LoginButton(onClick = {})
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            SignUpButton(
-                onClick = {
-                    // 회원가입 처리 로직
-                }
-            )
+            SignUpButton(onClick = {})
         }
 
         Spacer(modifier = Modifier.size(60.dp))
@@ -172,41 +115,19 @@ fun LoginScreen(
         Spacer(modifier = Modifier.size(40.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            GoogleLoginButton(onClick = {
-                coroutineScope.launch {
-                    loginViewModel.googleLogin(
-                        context,
-                        onFailure = { isGoogleAccountSettingDialogOpen = true }
-                    )
-                }
-            })
+            GoogleLoginButton(onClick = {})
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            KakaoLoginButton(onClick = {
-                coroutineScope.launch {
-                    loginViewModel.kakaoLogin(context)
-                }
-            })
+            KakaoLoginButton(onClick = {})
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            NaverLoginButton(onClick = {
-                coroutineScope.launch {
-                    loginViewModel.naverLogin(context)
-                }
-            })
+            NaverLoginButton(onClick = {})
         }
 
         Spacer(modifier = Modifier.size(40.dp))
     }
-
-    GoogleAccountSettingDialog(
-        isOpen = isGoogleAccountSettingDialogOpen,
-        onDismiss = { isGoogleAccountSettingDialogOpen = false },
-        onConfirm = {
-            loginViewModel.openGoogleAccountSetting(context)
-        })
 }
 
 @Composable
@@ -247,40 +168,20 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 @Composable
 fun LoginButton(onClick: () -> Unit) {
     CustomButton(
-        text = "로그인",
-        onClick = onClick,
-        backgroundColor = LightThemeColor.skyblue
+        text = "로그인", onClick = onClick, backgroundColor = LightThemeColor.skyblue
     )
 }
 
 @Composable
 fun SignUpButton(onClick: () -> Unit) {
     CustomButton(
-        text = "회원가입",
-        onClick = onClick,
-        backgroundColor = LightThemeColor.orange
+        text = "회원가입", onClick = onClick, backgroundColor = LightThemeColor.orange
     )
 }
 
 @Composable
 fun GoogleLoginButton(onClick: () -> Unit) {
     Svg(drawableId = R.drawable.ic_google, size = 50, onClick = onClick)
-}
-
-@Composable
-fun GoogleAccountSettingDialog(
-    isOpen: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    if (isOpen) {
-        CustomAlertDialog(
-            title = "계정 추가 필요",
-            text = "로그인을 위해 Google 계정을 추가하세요.",
-            onDismiss = onDismiss,
-            onConfirm = onConfirm
-        )
-    }
 }
 
 @Composable
@@ -292,3 +193,4 @@ fun KakaoLoginButton(onClick: () -> Unit) {
 fun NaverLoginButton(onClick: () -> Unit) {
     Svg(drawableId = R.drawable.ic_naver, size = 50, onClick = onClick)
 }
+

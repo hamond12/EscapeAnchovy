@@ -15,17 +15,10 @@ import com.hamond.escapeanchovy.data.repository.store.StoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import org.json.JSONObject
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-class LogInViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val googleLoginRepository: GoogleLoginRepository,
     private val kakaoLoginRepository: KakaoLoginRepository,
     private val naverLoginRepository: NaverLoginRepository,
@@ -77,12 +70,12 @@ class LogInViewModel @Inject constructor(
         }
     }
 
-    suspend fun naverLogin(context: Context){
+    suspend fun naverLogin(context: Context) {
         try {
             val accessToken = naverLoginRepository.loginWithNaverAccount(context)
             val user = naverLoginRepository.getNaverUser(accessToken)
             handleLoginSuccess(user)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             _loginResult.value = Result.failure(e)
         }
     }
