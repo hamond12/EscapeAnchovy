@@ -11,6 +11,7 @@ object LightThemeColor {
     val subText = Color(0xFF585858)
     val skyblue = Color(0xFF00B6EF)
     val orange = Color(0xFFFFB020)
+    val error = Color(0xFFFF5555)
 }
 
 // 다크모드 색상정의
