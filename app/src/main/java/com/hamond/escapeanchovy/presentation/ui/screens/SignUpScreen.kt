@@ -49,9 +49,8 @@ fun SignUpScreen(navController: NavHostController) {
     }
 }
 
-
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewSignUpScreen(){
-    SignUpScreen(navController = rememberNavController())
+    SignUpScreen(rememberNavController())
 }

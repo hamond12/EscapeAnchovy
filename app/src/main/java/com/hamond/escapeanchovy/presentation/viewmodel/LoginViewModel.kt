@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings.ACTION_ADD_ACCOUNT
 import android.provider.Settings.EXTRA_ACCOUNT_TYPES
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import com.hamond.escapeanchovy.data.model.User
 import com.hamond.escapeanchovy.data.repository.googleLogin.GoogleLoginRepository
@@ -16,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -34,10 +37,7 @@ class LoginViewModel @Inject constructor(
         context.startActivity(intent)
     }
 
-    suspend fun googleLogin(
-        context: Context,
-        onFailure: () -> Unit
-    ) {
+    suspend fun googleLogin(context: Context) {
         val credentialManager = CredentialManager.create(context)
         val request = googleLoginRepository.createCredentialRequest()
 
@@ -45,8 +45,9 @@ class LoginViewModel @Inject constructor(
             credentialManager.getCredential(request = request, context = context)
         }.onSuccess {
             performGoogleLogin(it)
-        }.onFailure {
-            onFailure()
+        }.onFailure { error ->
+            if (error is GetCredentialCancellationException)
+            else openGoogleAccountSetting(context)
         }
     }
 

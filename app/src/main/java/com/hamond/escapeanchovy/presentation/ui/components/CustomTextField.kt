@@ -32,7 +32,6 @@ import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 
-
 @Composable
 fun CustomTextField(
     value: String,

@@ -1,7 +1,6 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -67,8 +66,6 @@ fun LoginScreen(
 
     var isSocialLogin by remember { mutableStateOf(true) }
     var isAutoLogin by remember { mutableStateOf(false) }
-
-    var isGoogleAccountSettingDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(loginResult) {
         loginResult?.let { result ->
@@ -180,10 +177,7 @@ fun LoginScreen(
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.googleLogin(
-                        context,
-                        onFailure = { isGoogleAccountSettingDialogOpen = true }
-                    )
+                    loginViewModel.googleLogin(context)
                 }
             })
 
@@ -206,13 +200,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.size(40.dp))
     }
-
-    GoogleAccountSettingDialog(
-        isOpen = isGoogleAccountSettingDialogOpen,
-        onDismiss = { isGoogleAccountSettingDialogOpen = false },
-        onConfirm = {
-            loginViewModel.openGoogleAccountSetting(context)
-        })
 }
 
 @Composable
@@ -274,22 +261,6 @@ fun SignUpButton(onClick: () -> Unit) {
 @Composable
 fun GoogleLoginButton(onClick: () -> Unit) {
     Svg(drawableId = R.drawable.ic_google, size = 50, onClick = onClick)
-}
-
-@Composable
-fun GoogleAccountSettingDialog(
-    isOpen: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    if (isOpen) {
-        CustomAlertDialog(
-            title = "계정 추가 필요",
-            text = "로그인을 위해 Google 계정을 추가하세요.",
-            onDismiss = onDismiss,
-            onConfirm = onConfirm
-        )
-    }
 }
 
 @Composable

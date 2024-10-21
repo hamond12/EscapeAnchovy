@@ -20,8 +20,8 @@ class GoogleLoginRepositoryImpl @Inject constructor(
 
     override fun createCredentialRequest(): GetCredentialRequest {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // 모든 Google 계정 포함
-            .setAutoSelectEnabled(true) // Google 계정을 자동으로 선택
+            .setFilterByAuthorizedAccounts(false) // 디바이스의 모든 Google 계정 선택 가능
+            .setAutoSelectEnabled(false) // Google 계정 자동선택 비활성화
             .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
             .build()
 
