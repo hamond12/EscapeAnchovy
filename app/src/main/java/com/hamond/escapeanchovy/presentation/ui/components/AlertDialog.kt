@@ -12,7 +12,7 @@ import com.hamond.escapeanchovy.ui.theme.b2_regular
 import com.hamond.escapeanchovy.ui.theme.h2_medium
 
 @Composable
-fun CustomAlertDialog(
+fun AlertDialog(
     title: String,
     text: String,
     onDismiss: () -> Unit,

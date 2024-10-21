@@ -33,12 +33,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.constants.Routes
-import com.hamond.escapeanchovy.presentation.ui.components.CustomAlertDialog
-import com.hamond.escapeanchovy.presentation.ui.components.CustomButton
-import com.hamond.escapeanchovy.presentation.ui.components.CustomCheckbox
-import com.hamond.escapeanchovy.presentation.ui.components.CustomTextField
+import com.hamond.escapeanchovy.presentation.ui.components.Button
+import com.hamond.escapeanchovy.presentation.ui.components.Checkbox
 import com.hamond.escapeanchovy.presentation.ui.components.Divider
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
+import com.hamond.escapeanchovy.presentation.ui.components.TextField
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b3_bold
@@ -51,9 +50,7 @@ import com.hamond.escapeanchovy.utils.CommonUtils.showToast
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(
-    navController: NavHostController,
-) {
+fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -204,7 +201,7 @@ fun LoginScreen(
 
 @Composable
 fun EmailTextField(email: String, onEmailChange: (String) -> Unit) {
-    CustomTextField(
+    TextField(
         value = email,
         onValueChange = { onEmailChange(it) },
         drawableId = R.drawable.ic_email,
@@ -217,7 +214,7 @@ fun PasswordTextField(
     password: String,
     onPasswordChange: (String) -> Unit,
 ) {
-    CustomTextField(
+    TextField(
         value = password,
         onValueChange = { onPasswordChange(it) },
         drawableId = R.drawable.ic_password,
@@ -231,7 +228,7 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CustomCheckbox(
+        Checkbox(
             isChecked = isChecked,
             onCheckedChange = { onCheckedChange(it) },
         )
@@ -242,7 +239,7 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 
 @Composable
 fun LoginButton(onClick: () -> Unit) {
-    CustomButton(
+    Button(
         text = "로그인",
         onClick = onClick,
         backgroundColor = LightThemeColor.skyblue
@@ -251,7 +248,7 @@ fun LoginButton(onClick: () -> Unit) {
 
 @Composable
 fun SignUpButton(onClick: () -> Unit) {
-    CustomButton(
+    Button(
         text = "회원가입",
         onClick = onClick,
         backgroundColor = LightThemeColor.orange

@@ -20,22 +20,17 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MyApp()
-        }
+        setContent { MyApp() }
     }
 }
 
 @Composable
 fun MyApp() {
-
-    val navController = rememberNavController()
-
     val context = LocalContext.current
     val autoLogin = getAutoLogin(context)
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,

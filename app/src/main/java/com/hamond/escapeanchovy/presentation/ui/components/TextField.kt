@@ -33,7 +33,7 @@ import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 
 @Composable
-fun CustomTextField(
+fun TextField(
     value: String,
     onValueChange: (String) -> Unit,
     drawableId: Int,
@@ -115,7 +115,7 @@ fun CustomTextField(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCustomTextfield() {
-    CustomTextField(
+    TextField(
         value = "",
         onValueChange = {},
         drawableId = R.drawable.ic_password,

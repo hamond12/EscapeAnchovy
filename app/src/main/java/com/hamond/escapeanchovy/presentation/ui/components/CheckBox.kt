@@ -26,7 +26,7 @@ import com.hamond.escapeanchovy.ui.theme.LightThemeColor
 import com.hamond.escapeanchovy.utils.NoRippleTheme
 
 @Composable
-fun CustomCheckbox(
+fun Checkbox(
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -65,7 +65,7 @@ fun CustomCheckbox(
 @Composable
 fun PreviewSimpleScreen() {
     var isChecked by remember { mutableStateOf(false) }
-    CustomCheckbox(
+    Checkbox(
         isChecked = isChecked,
         onCheckedChange = { isChecked = it },
     )

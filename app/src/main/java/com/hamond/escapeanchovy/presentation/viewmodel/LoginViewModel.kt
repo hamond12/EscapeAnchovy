@@ -31,11 +31,6 @@ class LoginViewModel @Inject constructor(
     private val _loginResult = MutableStateFlow<Result<String>?>(null)
     val loginResult: StateFlow<Result<String?>?> get() = _loginResult
 
-    fun openGoogleAccountSetting(context: Context) {
-        val intent = Intent(ACTION_ADD_ACCOUNT)
-        intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
-        context.startActivity(intent)
-    }
 
     suspend fun googleLogin(context: Context) {
         val credentialManager = CredentialManager.create(context)
@@ -59,6 +54,12 @@ class LoginViewModel @Inject constructor(
         } catch (e: Exception) {
             _loginResult.value = Result.failure(e)
         }
+    }
+
+    private fun openGoogleAccountSetting(context: Context) {
+        val intent = Intent(ACTION_ADD_ACCOUNT)
+        intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+        context.startActivity(intent)
     }
 
     suspend fun kakaoLogin(context: Context) {
