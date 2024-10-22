@@ -1,46 +1,32 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
-import android.view.ViewTreeObserver
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.hamond.escapeanchovy.presentation.ui.components.Button
@@ -56,20 +42,13 @@ import com.hamond.escapeanchovy.ui.theme.h3_bold
 @Composable
 fun SignUpScreen(navController: NavHostController) {
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
+    //val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberScrollState()
 
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordCheck by remember { mutableStateOf("") }
-
-    val coroutineScope = rememberCoroutineScope()
-
-
-    val keyboardHeight = WindowInsets.ime.getBottom(LocalDensity.current)
-
-
 
     Column(
         modifier = Modifier
@@ -80,7 +59,6 @@ fun SignUpScreen(navController: NavHostController) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
     ) {
-        // 스크롤 레이아웃
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -99,16 +77,16 @@ fun SignUpScreen(navController: NavHostController) {
             ) {
                 Text(text = "이메일", style = b4_regular)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "", style = caption1.copy(color = LightModeColor.error))
+                SignUpEmailValidationMessage(text = "")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 Box(modifier = Modifier.weight(3f)) {
-                    SignUpEmailTextField(email = email, onEmailChange = { email = it })
+                    SignUpEmailTextField(email = email, onValueChange = { email = it })
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OutlinedButton(onClick = {}, text = "인증 요청")
+                    SignUpEmailValidationButton(onClick = {})
                 }
             }
             Spacer(modifier = Modifier.height(28.dp))
@@ -117,32 +95,32 @@ fun SignUpScreen(navController: NavHostController) {
             ) {
                 Text(text = "이름", style = b4_regular)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "", style = caption1.copy(color = LightModeColor.error))
+                SignUpNameValidationMessage(text = "")
             }
             Spacer(modifier = Modifier.height(8.dp))
-            SignUpNameTextField(name = name, onNameChange = { name = it })
+            SignUpNameTextField(name = name, onValueChange = { name = it })
             Spacer(modifier = Modifier.height(28.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = "비밀번호", style = b4_regular)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "", style = caption1.copy(color = LightModeColor.error))
+                SignUpPasswordValidationMessage(text = "")
             }
             Spacer(modifier = Modifier.height(8.dp))
-            SignUpPasswordTextField(password = password, onPasswordChange = { password = it })
+            SignUpPasswordTextField(password = password, onValueChange = { password = it })
             Spacer(modifier = Modifier.height(28.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = "비밀번호 확인", style = b4_regular)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "", style = caption1.copy(color = LightModeColor.error))
+                SignUpPasswordCheckValidationMessage(text = "")
             }
             Spacer(modifier = Modifier.height(8.dp))
             SignUpPasswordCheckTextField(
                 passwordCheck = passwordCheck,
-                onPasswordCheckChange = { passwordCheck = it }
+                onValueChange = { passwordCheck = it }
             )
         }
         Row(
@@ -171,70 +149,73 @@ fun SignUpScreen(navController: NavHostController) {
 }
 
 @Composable
-fun SignUpEmailTextField(email: String, onEmailChange: (String) -> Unit) {
+fun SignUpEmailValidationMessage(text:String){
+    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+}
+
+@Composable
+fun SignUpEmailTextField(email: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = email,
-        onValueChange = { onEmailChange(it) },
+        onValueChange = { onValueChange(it) },
         hint = "이메일 입력"
     )
 }
 
 @Composable
-fun SignUpNameTextField(name: String, onNameChange: (String) -> Unit) {
+fun SignUpEmailValidationButton(onClick: () -> Unit){
+    OutlinedButton(onClick = {}, text = "인증 요청")
+}
+
+@Composable
+fun SignUpNameValidationMessage(text:String){
+    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+}
+
+@Composable
+fun SignUpNameTextField(name: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = name,
-        onValueChange = { onNameChange(it) },
+        onValueChange = { onValueChange(it) },
         maxLength = 10,
         hint = "이름 입력 (10자 제한)"
     )
 }
 
 @Composable
-fun SignUpPasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
+fun SignUpPasswordValidationMessage(text:String){
+    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+}
+
+@Composable
+fun SignUpPasswordTextField(password: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = password,
-        onValueChange = { onPasswordChange(it) },
+        onValueChange = { onValueChange(it) },
         hint = "비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)",
         isPassword = true
     )
 }
 
 @Composable
-fun SignUpPasswordCheckTextField(passwordCheck: String, onPasswordCheckChange: (String) -> Unit) {
+fun SignUpPasswordCheckValidationMessage(text:String){
+    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+}
+
+@Composable
+fun SignUpPasswordCheckTextField(passwordCheck: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = passwordCheck,
-        onValueChange = { onPasswordCheckChange(it) },
+        onValueChange = { onValueChange(it) },
         hint = "비밀번호 재입력 ",
         isPassword = true,
         isLast = true
     )
 }
 
+
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewSignUpScreen() {
     SignUpScreen(rememberNavController())
-}
-
-
-@Composable
-fun rememberImeState(): State<Boolean> {
-    val imeState = remember {
-        mutableStateOf(false)
-    }
-
-    val view = LocalView.current
-    DisposableEffect(view) {
-        val listener = ViewTreeObserver.OnGlobalLayoutListener {
-            val isKeyboardOpen = ViewCompat.getRootWindowInsets(view)
-                ?.isVisible(WindowInsetsCompat.Type.ime()) ?: true
-            imeState.value = isKeyboardOpen
-        }
-
-        view.viewTreeObserver.addOnGlobalLayoutListener(listener)
-        onDispose {
-            view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
-        }
-    }
-    return imeState
 }

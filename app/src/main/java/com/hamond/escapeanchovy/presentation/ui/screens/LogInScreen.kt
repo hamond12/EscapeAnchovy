@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,7 +46,6 @@ import com.hamond.escapeanchovy.ui.theme.b4_regular
 import com.hamond.escapeanchovy.ui.theme.h1_bold
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
 import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
-import com.hamond.escapeanchovy.utils.CommonUtils.showToast
 import kotlinx.coroutines.launch
 
 @Composable
@@ -106,9 +102,9 @@ fun LoginScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.size(50.dp))
-            LoginEmailTextField(email = email, onEmailChange = { email = it })
+            LoginEmailTextField(email = email, onValueChange = { email = it })
             Spacer(modifier = Modifier.size(16.dp))
-            LoginPasswordTextField(password = password, onPasswordChange = { password = it })
+            LoginPasswordTextField(password = password, onValueChange = { password = it })
             Spacer(modifier = Modifier.size(26.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -185,10 +181,10 @@ fun LoginScreen(navController: NavHostController) {
 }
 
 @Composable
-fun LoginEmailTextField(email: String, onEmailChange: (String) -> Unit) {
+fun LoginEmailTextField(email: String, onValueChange: (String) -> Unit) {
     TextField(
         value = email,
-        onValueChange = { onEmailChange(it) },
+        onValueChange = { onValueChange(it) },
         drawableId = R.drawable.ic_email,
         hint = "이메일 입력",
     )
@@ -197,11 +193,11 @@ fun LoginEmailTextField(email: String, onEmailChange: (String) -> Unit) {
 @Composable
 fun LoginPasswordTextField(
     password: String,
-    onPasswordChange: (String) -> Unit,
+    onValueChange: (String) -> Unit,
 ) {
     TextField(
         value = password,
-        onValueChange = { onPasswordChange(it) },
+        onValueChange = { onValueChange(it) },
         drawableId = R.drawable.ic_password,
         hint = "비밀번호 입력",
         isPassword = true,
