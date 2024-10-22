@@ -1,15 +1,14 @@
 package com.hamond.escapeanchovy.presentation.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,12 +23,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.ui.theme.LightThemeColor
+import com.hamond.escapeanchovy.ui.theme.LightModeColor
 import com.hamond.escapeanchovy.ui.theme.b4_regular
 
 @Composable
@@ -37,15 +37,16 @@ fun TextField(
     value: String,
     onValueChange: (String) -> Unit,
     drawableId: Int,
-    placeholder: String,
+    hint: String,
     isPassword: Boolean = false,
-    maxLength: Int = 20
+    isLast: Boolean = false,
+    maxLength: Int = 50
 ) {
 
     var isPasswordHidden by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
-    Column {
+    Box {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -53,7 +54,7 @@ fun TextField(
             Icon(
                 modifier = Modifier.padding(start = 4.dp),
                 imageVector = ImageVector.vectorResource(drawableId),
-                tint = LightThemeColor.icon,
+                tint = LightModeColor.icon,
                 contentDescription = null,
             )
             BasicTextField(
@@ -77,27 +78,23 @@ fun TextField(
                     ) {
                         if (value.isEmpty()) {
                             Text(
-                                text = placeholder,
-                                style = b4_regular.copy(color = LightThemeColor.hint),
+                                text = hint,
+                                style = b4_regular.copy(color = LightModeColor.hint),
                             )
                         }
                         innerTextField()
                     }
                 },
-                visualTransformation = if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None
-            )
+                visualTransformation = if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = if (isLast) ImeAction.Done else ImeAction.Next
+                ),
+
+                )
             if (isPassword) {
-                Icon(
-                    imageVector = if (isPasswordHidden) {
-                        ImageVector.vectorResource(R.drawable.ic_visibility_off)
-                    } else {
-                        ImageVector.vectorResource(R.drawable.ic_visibility)
-                    },
-                    modifier = Modifier
-                        .clickable { isPasswordHidden = !isPasswordHidden }
-                        .padding(end = 4.dp),
-                    tint = LightThemeColor.icon,
-                    contentDescription = null,
+                Svg(
+                    drawableId = if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility,
+                    onClick = { isPasswordHidden = !isPasswordHidden },
                 )
             }
         }
@@ -114,12 +111,12 @@ fun TextField(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewCustomTextfield() {
+fun PreviewTextfield() {
     TextField(
         value = "",
         onValueChange = {},
         drawableId = R.drawable.ic_password,
-        placeholder = "",
+        hint = "",
         isPassword = true
     )
 }

@@ -2,6 +2,7 @@ package com.hamond.escapeanchovy.presentation.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
@@ -15,8 +16,8 @@ import com.hamond.escapeanchovy.utils.NoRippleTheme
 @Composable
 fun Svg(
     drawableId: Int,
-    size: Int,
-    onClick: () -> Unit = {} // 클릭 이벤트를 위한 람다 매개변수 추가
+    size: Int = 24,
+    onClick: () -> Unit = {}
 ) {
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Image(
@@ -24,7 +25,7 @@ fun Svg(
             contentDescription = null,
             modifier = Modifier
                 .size(size.dp)
-                .clickable(onClick = onClick) // 클릭 이벤트 추가
+                .clickable(onClick = onClick)
         )
     }
 }

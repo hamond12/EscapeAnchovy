@@ -7,7 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.hamond.escapeanchovy.ui.theme.LightThemeColor
+import com.hamond.escapeanchovy.ui.theme.LightModeColor
 import com.hamond.escapeanchovy.ui.theme.b2_regular
 import com.hamond.escapeanchovy.ui.theme.h2_medium
 
@@ -19,7 +19,7 @@ fun AlertDialog(
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
-        containerColor = LightThemeColor.background,
+        containerColor = LightModeColor.background,
         onDismissRequest = onDismiss,
         title = {
             Text(text = title, style = h2_medium)

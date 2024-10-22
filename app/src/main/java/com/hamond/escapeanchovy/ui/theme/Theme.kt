@@ -16,7 +16,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    background = LightThemeColor.background
+    background = LightModeColor.background
 )
 
 @Composable
@@ -36,7 +36,6 @@ fun EscapeAnchovyTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-
         content = content
     )
 }

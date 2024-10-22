@@ -20,14 +20,14 @@ import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.presentation.ui.components.Divider
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
 import com.hamond.escapeanchovy.presentation.ui.screens.AutoLoginCheckbox
-import com.hamond.escapeanchovy.presentation.ui.screens.EmailTextField
 import com.hamond.escapeanchovy.presentation.ui.screens.GoogleLoginButton
 import com.hamond.escapeanchovy.presentation.ui.screens.KakaoLoginButton
 import com.hamond.escapeanchovy.presentation.ui.screens.LoginButton
+import com.hamond.escapeanchovy.presentation.ui.screens.LoginEmailTextField
+import com.hamond.escapeanchovy.presentation.ui.screens.LoginPasswordTextField
 import com.hamond.escapeanchovy.presentation.ui.screens.NaverLoginButton
-import com.hamond.escapeanchovy.presentation.ui.screens.PasswordTextField
 import com.hamond.escapeanchovy.presentation.ui.screens.SignUpButton
-import com.hamond.escapeanchovy.ui.theme.LightThemeColor
+import com.hamond.escapeanchovy.ui.theme.LightModeColor
 import com.hamond.escapeanchovy.ui.theme.b3_bold
 import com.hamond.escapeanchovy.ui.theme.b3_regular
 import com.hamond.escapeanchovy.ui.theme.b4_regular
@@ -47,7 +47,6 @@ fun PreviewLoginScreen() {
                 .padding(start = 50.dp, end = 50.dp),
         ) {
             Spacer(modifier = Modifier.size(60.dp))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -56,17 +55,11 @@ fun PreviewLoginScreen() {
                 Text(text = "ESCAPE\nANCHOVY", style = h1_bold)
                 Spacer(modifier = Modifier.size(16.dp))
             }
-
             Spacer(modifier = Modifier.size(50.dp))
-
-            EmailTextField(email = "", onEmailChange = { })
-
+            LoginEmailTextField(email = "", onEmailChange = { })
             Spacer(modifier = Modifier.size(16.dp))
-
-            PasswordTextField(password = "", onPasswordChange = {})
-
+            LoginPasswordTextField(password = "", onPasswordChange = {})
             Spacer(modifier = Modifier.size(26.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -77,24 +70,18 @@ fun PreviewLoginScreen() {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "이메일 찾기 / 비밀번호 재설정", style = b4_regular.copy(
-                            color = LightThemeColor.subText,
+                            color = LightModeColor.subText,
                         )
                     )
-                    Divider(width = 142, color = LightThemeColor.subText, topPadding = 2)
+                    Divider(width = 142, color = LightModeColor.subText, topPadding = 2)
                 }
             }
-
             Spacer(modifier = Modifier.size(40.dp))
-
             LoginButton(onClick = {})
-
             Spacer(modifier = Modifier.size(20.dp))
-
             SignUpButton(onClick = {})
         }
-
         Spacer(modifier = Modifier.size(60.dp))
-
         Row(
             Modifier
                 .fillMaxWidth()
@@ -102,31 +89,23 @@ fun PreviewLoginScreen() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Divider(width = 80, color = LightThemeColor.hint)
+            Divider(width = 80, color = LightModeColor.hint)
             Row {
                 Text(text = "SNS 계정", style = b3_bold)
                 Text(text = "으로 ", style = b3_regular)
                 Text(text = "간편 ", style = b3_bold)
                 Text(text = "로그인", style = b3_regular)
             }
-            Divider(width = 80, color = LightThemeColor.hint)
+            Divider(width = 80, color = LightModeColor.hint)
         }
-
         Spacer(modifier = Modifier.size(40.dp))
-
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {})
-
             Spacer(modifier = Modifier.size(40.dp))
-
             KakaoLoginButton(onClick = {})
-
             Spacer(modifier = Modifier.size(40.dp))
-
             NaverLoginButton(onClick = {})
         }
-
         Spacer(modifier = Modifier.size(40.dp))
     }
 }
-

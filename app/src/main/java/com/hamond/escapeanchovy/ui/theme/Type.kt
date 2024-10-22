@@ -14,7 +14,7 @@ val pretendard = FontFamily(
     Font(R.font.pretendard_bold, FontWeight.Bold, FontStyle.Normal)
 )
 
-val textColor = LightThemeColor.text
+val textColor = LightModeColor.text
 
 val h1_bold = TextStyle(
     fontFamily = pretendard,
