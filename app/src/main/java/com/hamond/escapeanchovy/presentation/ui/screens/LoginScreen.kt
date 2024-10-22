@@ -48,6 +48,7 @@ import com.hamond.escapeanchovy.ui.theme.h1_bold
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
 import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -70,11 +71,13 @@ fun LoginScreen(navController: NavHostController) {
             when (loginState) {
                 is LoginState.Init -> {}
                 is LoginState.Failure -> {
-                    Log.e("Login", "${loginState.error}")
+                    val error = loginState.e
+                    Log.e("Login", "$error")
                 }
                 is LoginState.Success -> {
+                    val email = loginState.data
                     if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                    saveUserEmail(context, loginState.email)
+                    saveUserEmail(context, loginState.data)
                     loginViewModel.initLoginResult()
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
