@@ -77,7 +77,7 @@ fun PreviewLoginScreen() {
                 }
             }
             Spacer(modifier = Modifier.size(40.dp))
-            LoginButton(onClick = {})
+            LoginButton(onClick = {}, enabled = false)
             Spacer(modifier = Modifier.size(20.dp))
             SignUpButton(onClick = {})
         }

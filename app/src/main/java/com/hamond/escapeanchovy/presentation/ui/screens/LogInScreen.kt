@@ -130,9 +130,9 @@ fun LoginScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.size(40.dp))
             LoginButton(
                 onClick = {
-                    // 로그인 처리 로직
                     isSocialLogin = false
-                }
+                },
+                enabled = email.isNotBlank() && password.isNotBlank()
             )
             Spacer(modifier = Modifier.size(20.dp))
             SignUpButton(
@@ -225,11 +225,12 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 }
 
 @Composable
-fun LoginButton(onClick: () -> Unit) {
+fun LoginButton(onClick: () -> Unit, enabled: Boolean) {
     Button(
         text = "로그인",
         onClick = onClick,
-        backgroundColor = LightModeColor.skyblue
+        backgroundColor = LightModeColor.skyblue,
+        enabled = enabled
     )
 }
 

@@ -23,9 +23,11 @@ fun Button(
     text: String,
     onClick: () -> Unit,
     backgroundColor: Color,
+    enabled: Boolean = true,
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
