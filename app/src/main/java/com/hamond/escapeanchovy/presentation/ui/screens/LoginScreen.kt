@@ -38,6 +38,7 @@ import com.hamond.escapeanchovy.presentation.ui.components.Checkbox
 import com.hamond.escapeanchovy.presentation.ui.components.Divider
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
 import com.hamond.escapeanchovy.presentation.ui.components.TextField
+import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.LightModeColor
 import com.hamond.escapeanchovy.ui.theme.b3_bold
@@ -56,7 +57,7 @@ fun LoginScreen(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
-    val loginResult by loginViewModel.loginResult.collectAsState()
+    val loginState by loginViewModel.loginState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -64,17 +65,21 @@ fun LoginScreen(navController: NavHostController) {
     var isSocialLogin by remember { mutableStateOf(true) }
     var isAutoLogin by remember { mutableStateOf(false) }
 
-    LaunchedEffect(loginResult) {
-        loginResult?.let { result ->
-            if (result.isSuccess) {
-                if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                saveUserEmail(context, result.getOrNull()!!)
-                loginViewModel.initLoginResult()
-                navController.navigate(Routes.HOME) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
+    LaunchedEffect(loginState) {
+        loginViewModel.loginState.collect { loginState ->
+            when (loginState) {
+                is LoginState.Init -> {}
+                is LoginState.Failure -> {
+                    Log.e("Login", "${loginState.error}")
                 }
-            } else {
-                Log.e("LoginError", "${result.exceptionOrNull()}")
+                is LoginState.Success -> {
+                    if (isSocialLogin || isAutoLogin) setAutoLogin(context)
+                    saveUserEmail(context, loginState.email)
+                    loginViewModel.initLoginResult()
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                }
             }
         }
     }

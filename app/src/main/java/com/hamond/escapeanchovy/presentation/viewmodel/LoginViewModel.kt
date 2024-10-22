@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings.ACTION_ADD_ACCOUNT
 import android.provider.Settings.EXTRA_ACCOUNT_TYPES
-import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -14,11 +13,12 @@ import com.hamond.escapeanchovy.data.repository.googleLogin.GoogleLoginRepositor
 import com.hamond.escapeanchovy.data.repository.kakaoLogin.KakaoLoginRepository
 import com.hamond.escapeanchovy.data.repository.naverLogin.NaverLoginRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
+import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -28,8 +28,8 @@ class LoginViewModel @Inject constructor(
     private val storeRepository: StoreRepository,
 ) : ViewModel() {
 
-    private val _loginResult = MutableStateFlow<Result<String>?>(null)
-    val loginResult: StateFlow<Result<String?>?> get() = _loginResult
+    private val _loginState = MutableStateFlow<LoginState<String>>(LoginState.Init)
+    val loginState = _loginState.asStateFlow()
 
 
     suspend fun googleLogin(context: Context) {
@@ -52,7 +52,7 @@ class LoginViewModel @Inject constructor(
             val user = googleLoginRepository.loginWithCredential(credential) // 자격 증명으로 로그인
             handleLoginSuccess(user)
         } catch (e: Exception) {
-            _loginResult.value = Result.failure(e)
+            _loginState.value = LoginState.Failure(e.message)
         }
     }
 
@@ -68,7 +68,7 @@ class LoginViewModel @Inject constructor(
             val user = kakaoLoginRepository.getKakaoUser()
             handleLoginSuccess(user)
         } catch (e: Exception) {
-            _loginResult.value = Result.failure(e)
+            _loginState.value = LoginState.Failure(e.message)
         }
     }
 
@@ -78,16 +78,16 @@ class LoginViewModel @Inject constructor(
             val user = naverLoginRepository.getNaverUser(accessToken)
             handleLoginSuccess(user)
         } catch (e: Exception) {
-            _loginResult.value = Result.failure(e)
+            _loginState.value = LoginState.Failure(e.message)
         }
     }
 
     private suspend fun handleLoginSuccess(user: User) {
-        storeRepository.saveAccountInfo(user) // 계정 정보 저장
-        _loginResult.value = Result.success(user.email) // 로그인 결과 성공 처리
+        storeRepository.saveAccountInfo(user)
+        _loginState.value = LoginState.Success(user.email)
     }
 
     fun initLoginResult() {
-        _loginResult.value = null
+        _loginState.value = LoginState.Init
     }
 }

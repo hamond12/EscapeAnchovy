@@ -56,9 +56,9 @@ fun PreviewLoginScreen() {
                 Spacer(modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.size(50.dp))
-            LoginEmailTextField(email = "", onEmailChange = { })
+            LoginEmailTextField(email = "", onValueChange = { })
             Spacer(modifier = Modifier.size(16.dp))
-            LoginPasswordTextField(password = "", onPasswordChange = {})
+            LoginPasswordTextField(password = "", onValueChange = {})
             Spacer(modifier = Modifier.size(26.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
