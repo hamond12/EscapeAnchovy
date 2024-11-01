@@ -27,9 +27,8 @@ class LoginViewModel @Inject constructor(
     private val storeRepository: StoreRepository,
 ) : ViewModel() {
 
-    private val _loginState = MutableStateFlow<LoginState<String>>(LoginState.Init)
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
     val loginState = _loginState.asStateFlow()
-
 
     suspend fun googleLogin(context: Context) {
         val credentialManager = CredentialManager.create(context)

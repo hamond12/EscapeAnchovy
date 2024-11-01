@@ -15,7 +15,7 @@ class StoreRepositoryImpl @Inject constructor(
         try {
             store.collection(USER).document(user.email).set(user).await()
         } catch (e: Exception) {
-            throw Exception(e.message)
+            throw Exception("유저 정보 저장 에러: ${e.message}")
         }
     }
 }

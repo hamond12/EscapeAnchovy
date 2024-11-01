@@ -48,16 +48,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
+
     val darkTheme = isSystemInDarkTheme()
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
-
     val loginViewModel = hiltViewModel<LoginViewModel>()
-    val loginState by loginViewModel.loginState.collectAsState()
+    //val loginState by loginViewModel.loginState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -65,17 +65,17 @@ fun LoginScreen(navController: NavHostController) {
     var isSocialLogin by remember { mutableStateOf(true) }
     var isAutoLogin by remember { mutableStateOf(false) }
 
-    LaunchedEffect(loginState) {
+
+    LaunchedEffect(Unit) {
         loginViewModel.loginState.collect { loginState ->
             when (loginState) {
                 is LoginState.Init -> {}
                 is LoginState.Failure -> {
-                    Log.e("Login", "${loginState.e}")
+                    Log.e("Login", "${loginState.error}")
                 }
-
                 is LoginState.Success -> {
                     if (isSocialLogin || isAutoLogin) setAutoLogin(context)
-                    saveUserEmail(context, loginState.data)
+                    saveUserEmail(context, loginState.email)
                     loginViewModel.initLoginResult()
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }

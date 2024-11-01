@@ -27,17 +27,22 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedButton
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedTextField
+import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
+import com.hamond.escapeanchovy.presentation.viewmodel.SignUpViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun SignUpScreen(navController: NavHostController) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
+
+    val signUpViewModel = hiltViewModel<SignUpViewModel>()
 
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
