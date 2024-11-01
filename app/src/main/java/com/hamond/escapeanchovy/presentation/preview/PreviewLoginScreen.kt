@@ -70,7 +70,7 @@ fun PreviewLoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 50.dp, end = 50.dp),
+                .padding(start = 48.dp, end = 48.dp),
         ) {
             Spacer(modifier = Modifier.height(60.dp))
             Row(
@@ -78,7 +78,7 @@ fun PreviewLoginScreen() {
             ) {
                 Svg(
                     drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
-                    size = 90.dp
+                    size = 92.dp
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -87,7 +87,7 @@ fun PreviewLoginScreen() {
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             LoginEmailTextField(email = email, onValueChange = { email = it })
             Spacer(modifier = Modifier.height(16.dp))
             LoginPasswordTextField(password = password, onValueChange = { password = it })

@@ -97,7 +97,7 @@ fun LoginScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 50.dp, end = 50.dp),
+                .padding(start = 48.dp, end = 48.dp),
         ) {
             Spacer(modifier = Modifier.height(60.dp))
             Row(
@@ -105,7 +105,7 @@ fun LoginScreen(navController: NavHostController) {
             ) {
                 Svg(
                     drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
-                    size = 90.dp
+                    size = 92.dp
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -114,11 +114,11 @@ fun LoginScreen(navController: NavHostController) {
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             LoginEmailTextField(email = email, onValueChange = { email = it })
             Spacer(modifier = Modifier.height(16.dp))
             LoginPasswordTextField(password = password, onValueChange = { password = it })
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

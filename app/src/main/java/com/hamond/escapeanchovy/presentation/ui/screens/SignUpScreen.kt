@@ -58,7 +58,7 @@ fun SignUpScreen(navController: NavHostController) {
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             Text(
                 text = "회원가입",
                 style = CustomTheme.typography.h3Bold.copy(color = CustomTheme.colors.text)
