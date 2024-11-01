@@ -1,9 +1,7 @@
 package com.hamond.escapeanchovy.presentation.ui.components
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -15,14 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b3_regular
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun Button(
     text: String,
     onClick: () -> Unit,
-    backgroundColor: Color,
+    background: Color,
     enabled: Boolean = true,
 ) {
     Button(
@@ -33,13 +30,14 @@ fun Button(
             .height(48.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor
+            disabledContainerColor = CustomTheme.colors.hint,
+            containerColor = background
         )
     ) {
         Text(
-            style = b3_regular,
+            style = CustomTheme.typography.b3Regular,
             text = text,
-            color = LightModeColor.background,
+            color = CustomTheme.colors.buttonText,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterVertically) // 텍스트 중앙 정렬
@@ -50,5 +48,9 @@ fun Button(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCustomButton() {
-    Button(text = "버튼", onClick = {}, backgroundColor = LightModeColor.skyblue)
+    Button(
+        text = "버튼",
+        onClick = {},
+        background = CustomTheme.colors.skyBlue
+    )
 }

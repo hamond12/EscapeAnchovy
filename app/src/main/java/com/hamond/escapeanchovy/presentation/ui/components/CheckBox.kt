@@ -22,7 +22,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 import com.hamond.escapeanchovy.utils.NoRippleTheme
 
 @Composable
@@ -38,12 +38,12 @@ fun Checkbox(
                 .size(18.dp)
                 .clickable { onCheckedChange(!isChecked) }
                 .background(
-                    color = if (isChecked) LightModeColor.skyblue else LightModeColor.background,
+                    color = if (isChecked) CustomTheme.colors.skyBlue else CustomTheme.colors.background,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .then(
                     if (!isChecked) {
-                        Modifier.border(1.dp, LightModeColor.hint, RoundedCornerShape(4.dp))
+                        Modifier.border(1.dp, CustomTheme.colors.hint, RoundedCornerShape(4.dp))
                     } else {
                         Modifier
                     }

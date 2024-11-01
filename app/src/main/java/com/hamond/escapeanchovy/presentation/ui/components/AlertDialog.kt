@@ -7,9 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b2_regular
-import com.hamond.escapeanchovy.ui.theme.h2_medium
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun AlertDialog(
@@ -19,25 +17,25 @@ fun AlertDialog(
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
-        containerColor = LightModeColor.background,
+        containerColor = CustomTheme.colors.background,
         onDismissRequest = onDismiss,
         title = {
-            Text(text = title, style = h2_medium)
+            Text(text = title, style = CustomTheme.typography.h2Medium)
         },
         text = {
-            Text(text = text, style = b2_regular)
+            Text(text = text, style = CustomTheme.typography.b2Regular)
         },
         confirmButton = {
             TextButton(onClick = {
                 onConfirm()
                 onDismiss()
             }) {
-                Text("확인", style = b2_regular)
+                Text("확인", style = CustomTheme.typography.b2Regular)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("취소", style = b2_regular)
+                Text("취소", style = CustomTheme.typography.b2Regular)
             }
         },
         modifier = Modifier

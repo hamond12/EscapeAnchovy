@@ -16,7 +16,6 @@ import com.hamond.escapeanchovy.data.repository.store.StoreRepository
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
@@ -41,15 +40,18 @@ class LoginViewModel @Inject constructor(
         }.onSuccess {
             performGoogleLogin(it)
         }.onFailure { error ->
-            if (error is GetCredentialCancellationException)
-            else openGoogleAccountSetting(context)
+            if (error is GetCredentialCancellationException) {
+                // 로그인 취소 시에는 아무것도 하지 않음
+            } else {
+                openGoogleAccountSetting(context)
+            }
         }
     }
 
     private suspend fun performGoogleLogin(result: GetCredentialResponse) {
         try {
-            val credential = googleLoginRepository.checkCredentialType(result) // 자격 증명 확인
-            val user = googleLoginRepository.loginWithCredential(credential) // 자격 증명으로 로그인
+            val credential = googleLoginRepository.checkCredentialType(result)
+            val user = googleLoginRepository.loginWithCredential(credential)
             handleLoginSuccess(user)
         } catch (e: Exception) {
             _loginState.value = LoginState.Failure(e.message)

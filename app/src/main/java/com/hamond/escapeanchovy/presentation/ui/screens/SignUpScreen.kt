@@ -1,12 +1,12 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -32,17 +32,11 @@ import androidx.navigation.compose.rememberNavController
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedButton
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedTextField
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b2_regular
-import com.hamond.escapeanchovy.ui.theme.b4_regular
-import com.hamond.escapeanchovy.ui.theme.caption1
-import com.hamond.escapeanchovy.ui.theme.h3_bold
-
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun SignUpScreen(navController: NavHostController) {
     val focusManager = LocalFocusManager.current
-    //val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberScrollState()
 
     var email by remember { mutableStateOf("") }
@@ -52,7 +46,7 @@ fun SignUpScreen(navController: NavHostController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .background(CustomTheme.colors.background)
             .padding(start = 40.dp, end = 40.dp)
             .imePadding()
             .pointerInput(Unit) {
@@ -65,17 +59,23 @@ fun SignUpScreen(navController: NavHostController) {
                 .verticalScroll(scrollState)
         ) {
             Spacer(modifier = Modifier.height(50.dp))
-            Text(text = "회원가입", style = h3_bold)
+            Text(
+                text = "회원가입",
+                style = CustomTheme.typography.h3Bold.copy(color = CustomTheme.colors.text)
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "데이터 백업을 위해 회원가입을 진행해주세요.",
-                style = b2_regular.copy(color = LightModeColor.subText)
+                style = CustomTheme.typography.b2Regular.copy(color = CustomTheme.colors.subText)
             )
             Spacer(modifier = Modifier.height(28.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "이메일", style = b4_regular)
+                Text(
+                    text = "이메일",
+                    style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
                 SignUpEmailValidationMessage(text = "")
             }
@@ -93,17 +93,31 @@ fun SignUpScreen(navController: NavHostController) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "이름", style = b4_regular)
+                Text(
+                    text = "이름",
+                    style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
                 SignUpNameValidationMessage(text = "")
             }
             Spacer(modifier = Modifier.height(8.dp))
-            SignUpNameTextField(name = name, onValueChange = { name = it })
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                Box(modifier = Modifier.weight(3f)) {
+                    SignUpNameTextField(name = email, onValueChange = { name = it })
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(modifier = Modifier.weight(1f)) {
+                    SignUpNameDuplicateCheckButton(onClick = {})
+                }
+            }
             Spacer(modifier = Modifier.height(28.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "비밀번호", style = b4_regular)
+                Text(
+                    text = "비밀번호",
+                    style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
                 SignUpPasswordValidationMessage(text = "")
             }
@@ -113,7 +127,10 @@ fun SignUpScreen(navController: NavHostController) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "비밀번호 확인", style = b4_regular)
+                Text(
+                    text = "비밀번호 확인",
+                    style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
                 SignUpPasswordCheckValidationMessage(text = "")
             }
@@ -133,15 +150,15 @@ fun SignUpScreen(navController: NavHostController) {
                 Button(
                     text = "회원가입",
                     onClick = { /*TODO*/ },
-                    backgroundColor = LightModeColor.skyblue
+                    background = CustomTheme.colors.skyBlue
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Box(modifier = Modifier.weight(1f)) {
                 Button(
                     text = "가입 취소",
-                    onClick = { /*TODO*/ },
-                    backgroundColor = LightModeColor.orange
+                    onClick = { navController.popBackStack() },
+                    background = CustomTheme.colors.orange
                 )
             }
         }
@@ -149,8 +166,11 @@ fun SignUpScreen(navController: NavHostController) {
 }
 
 @Composable
-fun SignUpEmailValidationMessage(text:String){
-    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+fun SignUpEmailValidationMessage(text: String) {
+    Text(
+        text = text,
+        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+    )
 }
 
 @Composable
@@ -163,13 +183,16 @@ fun SignUpEmailTextField(email: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun SignUpEmailValidationButton(onClick: () -> Unit){
-    OutlinedButton(onClick = {}, text = "인증 요청")
+fun SignUpEmailValidationButton(onClick: () -> Unit) {
+    OutlinedButton(onClick = {}, text = "인증 요청", buttonColor = CustomTheme.colors.skyBlue)
 }
 
 @Composable
-fun SignUpNameValidationMessage(text:String){
-    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+fun SignUpNameValidationMessage(text: String) {
+    Text(
+        text = text,
+        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+    )
 }
 
 @Composable
@@ -183,8 +206,16 @@ fun SignUpNameTextField(name: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun SignUpPasswordValidationMessage(text:String){
-    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+fun SignUpNameDuplicateCheckButton(onClick: () -> Unit) {
+    OutlinedButton(onClick = {}, text = "중복 확인", buttonColor = CustomTheme.colors.orange)
+}
+
+@Composable
+fun SignUpPasswordValidationMessage(text: String) {
+    Text(
+        text = text,
+        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+    )
 }
 
 @Composable
@@ -198,8 +229,11 @@ fun SignUpPasswordTextField(password: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun SignUpPasswordCheckValidationMessage(text:String){
-    Text(text = text, style = caption1.copy(color = LightModeColor.error))
+fun SignUpPasswordCheckValidationMessage(text: String) {
+    Text(
+        text = text,
+        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+    )
 }
 
 @Composable

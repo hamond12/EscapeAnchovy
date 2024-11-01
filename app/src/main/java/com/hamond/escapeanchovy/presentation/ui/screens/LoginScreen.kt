@@ -1,7 +1,9 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,25 +36,23 @@ import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.constants.Routes
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.Checkbox
-import com.hamond.escapeanchovy.presentation.ui.components.Divider
+import com.hamond.escapeanchovy.presentation.ui.components.Line
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
 import com.hamond.escapeanchovy.presentation.ui.components.TextField
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b3_bold
-import com.hamond.escapeanchovy.ui.theme.b3_regular
-import com.hamond.escapeanchovy.ui.theme.b4_regular
-import com.hamond.escapeanchovy.ui.theme.h1_bold
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
 import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
+    val darkTheme = isSystemInDarkTheme()
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -71,11 +70,10 @@ fun LoginScreen(navController: NavHostController) {
             when (loginState) {
                 is LoginState.Init -> {}
                 is LoginState.Failure -> {
-                    val error = loginState.e
-                    Log.e("Login", "$error")
+                    Log.e("Login", "${loginState.e}")
                 }
+
                 is LoginState.Success -> {
-                    val email = loginState.data
                     if (isSocialLogin || isAutoLogin) setAutoLogin(context)
                     saveUserEmail(context, loginState.data)
                     loginViewModel.initLoginResult()
@@ -90,6 +88,7 @@ fun LoginScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CustomTheme.colors.background)
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -100,20 +99,26 @@ fun LoginScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(start = 50.dp, end = 50.dp),
         ) {
-            Spacer(modifier = Modifier.size(60.dp))
+            Spacer(modifier = Modifier.height(60.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Svg(drawableId = R.drawable.logo, size = 90)
-                Spacer(modifier = Modifier.size(16.dp))
-                Text(text = "ESCAPE\nANCHOVY", style = h1_bold)
-                Spacer(modifier = Modifier.size(16.dp))
+                Svg(
+                    drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
+                    size = 90.dp
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "ESCAPE\nANCHOVY",
+                    style = CustomTheme.typography.h1Bold.copy(color = CustomTheme.colors.text)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
             }
-            Spacer(modifier = Modifier.size(50.dp))
+            Spacer(modifier = Modifier.height(50.dp))
             LoginEmailTextField(email = email, onValueChange = { email = it })
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             LoginPasswordTextField(password = password, onValueChange = { password = it })
-            Spacer(modifier = Modifier.size(26.dp))
+            Spacer(modifier = Modifier.height(26.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -121,70 +126,51 @@ fun LoginScreen(navController: NavHostController) {
             ) {
                 AutoLoginCheckbox(isChecked = isAutoLogin, onCheckedChange = { isAutoLogin = it })
                 Column(horizontalAlignment = Alignment.End) {
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = "이메일 찾기 / 비밀번호 재설정",
-                        style = b4_regular.copy(
-                            color = LightModeColor.subText,
-                        )
+                        style = CustomTheme.typography.b4Regular.copy(
+                            color = CustomTheme.colors.subText,
+                        ),
                     )
-                    Divider(width = 142, color = LightModeColor.subText, topPadding = 2)
+                    Line(width = 140.dp, color = CustomTheme.colors.subText, topPadding = 2)
                 }
             }
-            Spacer(modifier = Modifier.size(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             LoginButton(
                 onClick = {
                     isSocialLogin = false
                 },
                 enabled = email.isNotBlank() && password.isNotBlank()
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             SignUpButton(
                 onClick = { navController.navigate(Routes.SIGN_UP) }
             )
         }
-        Spacer(modifier = Modifier.size(60.dp))
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 40.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Divider(width = 80, color = LightModeColor.hint)
-            Row {
-                Text(text = "SNS 계정", style = b3_bold)
-                Text(text = "으로 ", style = b3_regular)
-                Text(text = "간편 ", style = b3_bold)
-                Text(text = "로그인", style = b3_regular)
-            }
-            Divider(width = 80, color = LightModeColor.hint)
-        }
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.height(60.dp))
+        SocialLoginText()
+        Spacer(modifier = Modifier.height(40.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
                     loginViewModel.googleLogin(context)
                 }
             })
-
-            Spacer(modifier = Modifier.size(40.dp))
-
+            Spacer(modifier = Modifier.width(40.dp))
             KakaoLoginButton(onClick = {
                 coroutineScope.launch {
                     loginViewModel.kakaoLogin(context)
                 }
             })
-
-            Spacer(modifier = Modifier.size(40.dp))
-
+            Spacer(modifier = Modifier.width(40.dp))
             NaverLoginButton(onClick = {
                 coroutineScope.launch {
                     loginViewModel.naverLogin(context)
                 }
             })
         }
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -224,7 +210,10 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
             onCheckedChange = { onCheckedChange(it) },
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "자동 로그인", style = b4_regular.copy(LightModeColor.subText))
+        Text(
+            text = "자동 로그인",
+            style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.subText)
+        )
     }
 }
 
@@ -233,7 +222,7 @@ fun LoginButton(onClick: () -> Unit, enabled: Boolean) {
     Button(
         text = "로그인",
         onClick = onClick,
-        backgroundColor = LightModeColor.skyblue,
+        background = CustomTheme.colors.skyBlue,
         enabled = enabled
     )
 }
@@ -243,21 +232,53 @@ fun SignUpButton(onClick: () -> Unit) {
     Button(
         text = "회원가입",
         onClick = onClick,
-        backgroundColor = LightModeColor.orange
+        background = CustomTheme.colors.orange
     )
 }
 
 @Composable
+fun SocialLoginText(){
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 40.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Line(width = 82.dp, color = CustomTheme.colors.hint)
+        Row {
+            Text(
+                text = "SNS 계정",
+                style = CustomTheme.typography.b3Bold.copy(color = CustomTheme.colors.text)
+            )
+            Text(
+                text = "으로 ",
+                style = CustomTheme.typography.b3Regular.copy(color = CustomTheme.colors.text)
+            )
+            Text(
+                text = "간편 ",
+                style = CustomTheme.typography.b3Bold.copy(color = CustomTheme.colors.text)
+            )
+            Text(
+                text = "로그인",
+                style = CustomTheme.typography.b3Regular.copy(color = CustomTheme.colors.text)
+            )
+        }
+        Line(width = 82.dp, color = CustomTheme.colors.hint)
+    }
+}
+
+@Composable
 fun GoogleLoginButton(onClick: () -> Unit) {
-    Svg(drawableId = R.drawable.ic_google, size = 50, onClick = onClick)
+    Svg(drawableId = R.drawable.ic_google, size = 50.dp, onClick = onClick)
 }
 
 @Composable
 fun KakaoLoginButton(onClick: () -> Unit) {
-    Svg(drawableId = R.drawable.ic_kakao, size = 50, onClick = onClick)
+    Svg(drawableId = R.drawable.ic_kakao, size = 50.dp, onClick = onClick)
 }
 
 @Composable
 fun NaverLoginButton(onClick: () -> Unit) {
-    Svg(drawableId = R.drawable.ic_naver, size = 50, onClick = onClick)
+    Svg(drawableId = R.drawable.ic_naver, size = 50.dp, onClick = onClick)
 }

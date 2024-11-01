@@ -1,41 +1,49 @@
 package com.hamond.escapeanchovy.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 
-private val DarkColorScheme = darkColorScheme(
-    background = backgroundDark
-)
-
-private val LightColorScheme = lightColorScheme(
-    background = LightModeColor.background
-)
+val LocalColorScheme = staticCompositionLocalOf { customLightColorScheme }
+val LocalTypography = staticCompositionLocalOf { CustomTypography() }
 
 @Composable
 fun EscapeAnchovyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val typography = CustomTypography()
+    val currentColor = remember {
+        if (!darkTheme) {
+            customLightColorScheme
+        } else {
+            customDarkColorScheme
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalColorScheme provides currentColor,
+        LocalTypography provides typography
+    ) {
+        ProvideTextStyle(
+            typography.b4Regular,
+            content = content
+        )
+    }
+}
+
+object CustomTheme {
+    val colors: CustomColorScheme
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalColorScheme.current
+
+    val typography: CustomTypography
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalTypography.current
 }

@@ -8,24 +8,30 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 import com.hamond.escapeanchovy.utils.NoRippleTheme
 
 @Composable
 fun Svg(
     drawableId: Int,
-    size: Int = 24,
-    onClick: () -> Unit = {}
+    size: Dp = 24.dp,
+    startPadding: Dp = 0.dp,
+    onClick: () -> Unit = {},
+    isIcon:Boolean = false
 ) {
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Image(
             imageVector = ImageVector.vectorResource(drawableId),
             contentDescription = null,
             modifier = Modifier
-                .size(size.dp)
-                .clickable(onClick = onClick)
+                .size(size).padding(start = startPadding)
+                .clickable(onClick = onClick),
+            colorFilter = if(isIcon) ColorFilter.tint(CustomTheme.colors.icon) else null
         )
     }
 }

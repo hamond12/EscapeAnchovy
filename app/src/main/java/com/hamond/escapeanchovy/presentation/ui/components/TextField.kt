@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -20,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
@@ -29,8 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b4_regular
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun TextField(
@@ -42,7 +43,6 @@ fun TextField(
     isLast: Boolean = false,
     maxLength: Int = 50
 ) {
-
     var isPasswordHidden by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
@@ -51,35 +51,32 @@ fun TextField(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                modifier = Modifier.padding(start = 4.dp),
-                imageVector = ImageVector.vectorResource(drawableId),
-                tint = LightModeColor.icon,
-                contentDescription = null,
-            )
+            Svg(drawableId = drawableId, startPadding = 4.dp, isIcon = true)
             BasicTextField(
                 value = value,
-                textStyle = b4_regular,
+                textStyle = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.text),
                 onValueChange = {
                     if (it.length <= maxLength && it.all { char -> !char.isWhitespace() }) {
                         onValueChange(it)
                     }
                 },
+                cursorBrush = SolidColor(CustomTheme.colors.text),
                 maxLines = 1,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(vertical = 12.dp)
+                    .height(48.dp)
                     .focusRequester(focusRequester),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                            .padding(start = 8.dp),
+                        contentAlignment = Alignment.CenterStart
                     ) {
                         if (value.isEmpty()) {
                             Text(
                                 text = hint,
-                                style = b4_regular.copy(color = LightModeColor.hint),
+                                style = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.hint),
                             )
                         }
                         innerTextField()
@@ -89,22 +86,23 @@ fun TextField(
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = if (isLast) ImeAction.Done else ImeAction.Next
                 ),
-
-                )
+            )
             if (isPassword) {
                 Svg(
                     drawableId = if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility,
                     onClick = { isPasswordHidden = !isPasswordHidden },
+                    size = 20.dp,
+                    isIcon = true
                 )
             }
+            Spacer(modifier = Modifier.width(12.dp))
         }
-
     }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(Color(0xFF8A848D))
+            .background(color = CustomTheme.colors.border)
             .padding(start = 8.dp)
     )
 }
@@ -116,7 +114,7 @@ fun PreviewTextfield() {
         value = "",
         onValueChange = {},
         drawableId = R.drawable.ic_password,
-        hint = "",
+        hint = "힌트 텍스트",
         isPassword = true
     )
 }

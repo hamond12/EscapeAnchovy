@@ -28,8 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b4_regular
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Composable
 fun OutlinedTextField(
@@ -45,8 +44,8 @@ fun OutlinedTextField(
 
     Box(
         modifier = Modifier
-            .border(1.dp, LightModeColor.border, shape = RoundedCornerShape(5.dp)) // 테두리 추가
-            .background(LightModeColor.background) // 배경 색상 추가
+            .border(1.dp, CustomTheme.colors.border, shape = RoundedCornerShape(5.dp))
+            .background(CustomTheme.colors.background)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -54,7 +53,7 @@ fun OutlinedTextField(
         ) {
             BasicTextField(
                 value = value,
-                textStyle = b4_regular,
+                textStyle = CustomTheme.typography.b4Regular,
                 onValueChange = {
                     if (it.length <= maxLength && it.all { char -> !char.isWhitespace() }) {
                         onValueChange(it)
@@ -75,7 +74,7 @@ fun OutlinedTextField(
                         if (value.isEmpty()) {
                             Text(
                                 text = hint,
-                                style = b4_regular.copy(color = LightModeColor.hint),
+                                style = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.hint),
                             )
                         }
                         innerTextField()
@@ -91,10 +90,11 @@ fun OutlinedTextField(
                 Svg(
                     drawableId = if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility,
                     onClick = { isPasswordHidden = !isPasswordHidden },
-                    size = 20
+                    size = 20.dp,
+                    isIcon = true
                 )
             }
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
         }
     }
 }

@@ -1,6 +1,10 @@
 package com.hamond.escapeanchovy.presentation.preview
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,16 +12,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
-import com.hamond.escapeanchovy.presentation.ui.components.Divider
+import com.hamond.escapeanchovy.presentation.ui.components.Line
 import com.hamond.escapeanchovy.presentation.ui.components.Svg
 import com.hamond.escapeanchovy.presentation.ui.screens.AutoLoginCheckbox
 import com.hamond.escapeanchovy.presentation.ui.screens.GoogleLoginButton
@@ -27,17 +40,30 @@ import com.hamond.escapeanchovy.presentation.ui.screens.LoginEmailTextField
 import com.hamond.escapeanchovy.presentation.ui.screens.LoginPasswordTextField
 import com.hamond.escapeanchovy.presentation.ui.screens.NaverLoginButton
 import com.hamond.escapeanchovy.presentation.ui.screens.SignUpButton
-import com.hamond.escapeanchovy.ui.theme.LightModeColor
-import com.hamond.escapeanchovy.ui.theme.b3_bold
-import com.hamond.escapeanchovy.ui.theme.b3_regular
-import com.hamond.escapeanchovy.ui.theme.b4_regular
-import com.hamond.escapeanchovy.ui.theme.h1_bold
+import com.hamond.escapeanchovy.presentation.ui.screens.SocialLoginText
+import com.hamond.escapeanchovy.ui.theme.CustomTheme
 
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewLoginScreen() {
+    val darkTheme = isSystemInDarkTheme()
+
+    val focusManager = LocalFocusManager.current
+
+    val scrollState = rememberScrollState()
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    var isSocialLogin by remember { mutableStateOf(true) }
+    var isAutoLogin by remember { mutableStateOf(false) }
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CustomTheme.colors.background)
+            .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
@@ -46,66 +72,63 @@ fun PreviewLoginScreen() {
                 .fillMaxWidth()
                 .padding(start = 50.dp, end = 50.dp),
         ) {
-            Spacer(modifier = Modifier.size(60.dp))
+            Spacer(modifier = Modifier.height(60.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Svg(drawableId = R.drawable.logo, size = 90)
-                Spacer(modifier = Modifier.size(16.dp))
-                Text(text = "ESCAPE\nANCHOVY", style = h1_bold)
-                Spacer(modifier = Modifier.size(16.dp))
+                Svg(
+                    drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
+                    size = 90.dp
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "ESCAPE\nANCHOVY",
+                    style = CustomTheme.typography.h1Bold.copy(color = CustomTheme.colors.text)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
             }
-            Spacer(modifier = Modifier.size(50.dp))
-            LoginEmailTextField(email = "", onValueChange = { })
-            Spacer(modifier = Modifier.size(16.dp))
-            LoginPasswordTextField(password = "", onValueChange = {})
-            Spacer(modifier = Modifier.size(26.dp))
+            Spacer(modifier = Modifier.height(50.dp))
+            LoginEmailTextField(email = email, onValueChange = { email = it })
+            Spacer(modifier = Modifier.height(16.dp))
+            LoginPasswordTextField(password = password, onValueChange = { password = it })
+            Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AutoLoginCheckbox(isChecked = false, onCheckedChange = {})
+                AutoLoginCheckbox(isChecked = isAutoLogin, onCheckedChange = { isAutoLogin = it })
                 Column(horizontalAlignment = Alignment.End) {
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
                     Text(
-                        text = "이메일 찾기 / 비밀번호 재설정", style = b4_regular.copy(
-                            color = LightModeColor.subText,
-                        )
+                        text = "이메일 찾기 / 비밀번호 재설정",
+                        style = CustomTheme.typography.b4Regular.copy(
+                            color = CustomTheme.colors.subText,
+                        ),
                     )
-                    Divider(width = 142, color = LightModeColor.subText, topPadding = 2)
+                    Line(width = 140.dp, color = CustomTheme.colors.subText, topPadding = 2)
                 }
             }
-            Spacer(modifier = Modifier.size(40.dp))
-            LoginButton(onClick = {}, enabled = false)
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+            LoginButton(
+                onClick = {
+                    isSocialLogin = false
+                },
+                enabled = email.isNotBlank() && password.isNotBlank()
+            )
+            Spacer(modifier = Modifier.height(20.dp))
             SignUpButton(onClick = {})
         }
-        Spacer(modifier = Modifier.size(60.dp))
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 40.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Divider(width = 80, color = LightModeColor.hint)
-            Row {
-                Text(text = "SNS 계정", style = b3_bold)
-                Text(text = "으로 ", style = b3_regular)
-                Text(text = "간편 ", style = b3_bold)
-                Text(text = "로그인", style = b3_regular)
-            }
-            Divider(width = 80, color = LightModeColor.hint)
-        }
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.height(60.dp))
+        SocialLoginText()
+        Spacer(modifier = Modifier.height(40.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {})
-            Spacer(modifier = Modifier.size(40.dp))
+            Spacer(modifier = Modifier.width(40.dp))
             KakaoLoginButton(onClick = {})
-            Spacer(modifier = Modifier.size(40.dp))
+            Spacer(modifier = Modifier.width(40.dp))
             NaverLoginButton(onClick = {})
         }
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
