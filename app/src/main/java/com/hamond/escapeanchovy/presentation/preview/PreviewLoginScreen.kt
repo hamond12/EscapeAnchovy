@@ -1,5 +1,6 @@
 package com.hamond.escapeanchovy.presentation.preview
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -46,11 +47,6 @@ import com.hamond.escapeanchovy.ui.theme.CustomTheme
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun PreviewLoginScreen() {
-    val darkTheme = isSystemInDarkTheme()
-
-    val focusManager = LocalFocusManager.current
-
-    val scrollState = rememberScrollState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -61,9 +57,7 @@ fun PreviewLoginScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CustomTheme.colors.background)
-            .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
-            .verticalScroll(scrollState),
+            .background(CustomTheme.colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
@@ -77,7 +71,7 @@ fun PreviewLoginScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Svg(
-                    drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
+                    drawableId =  R.drawable.logo,
                     size = 92.dp
                 )
                 Spacer(modifier = Modifier.width(16.dp))

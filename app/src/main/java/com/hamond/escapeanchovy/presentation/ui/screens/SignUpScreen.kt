@@ -1,5 +1,6 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,13 +17,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,21 +37,77 @@ import androidx.navigation.compose.rememberNavController
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedButton
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedTextField
-import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
+import com.hamond.escapeanchovy.presentation.ui.state.SignUpState
 import com.hamond.escapeanchovy.presentation.viewmodel.SignUpViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
+import com.hamond.escapeanchovy.utils.CommonUtils.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(navController: NavHostController) {
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+
+    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
     val signUpViewModel = hiltViewModel<SignUpViewModel>()
+    val emailValidation = signUpViewModel.emailValidation
+    val nameValidation = signUpViewModel.nameValidation
+    val passwordValidation = signUpViewModel.passwordValidation
+    val passwordCheckValidation = signUpViewModel.passwordCheckValidation
+
+    var isEmailLoading by remember { mutableStateOf(false) }
+    var isNameLoading by remember { mutableStateOf(false) }
+
+    var isEmailVerified by remember { mutableStateOf(false) }
+    var isNameVerified by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordCheck by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        signUpViewModel.deleteTempAccount()
+        signUpViewModel.signUpState.collect { signUpState ->
+            when (signUpState) {
+                is SignUpState.Init -> {
+                    isEmailLoading = false
+                    isNameLoading = false
+                }
+
+                is SignUpState.EmailLoading -> {
+                    isEmailLoading = true
+                }
+
+                is SignUpState.NameLoading -> {
+                    isNameLoading = true
+                }
+
+                is SignUpState.EmailVerified -> {
+                    isEmailLoading = false
+                    isEmailVerified = true
+                    signUpViewModel.deleteTempAccount()
+                }
+
+                is SignUpState.NameVerified -> {
+                    isNameLoading = false
+                    isNameVerified = true
+                }
+
+                is SignUpState.SignUp -> {
+                    signUpViewModel.initSignUpResult()
+                    navController.popBackStack()
+                    showToast(context, "회원가입이 완료되었습니다.")
+                }
+
+                is SignUpState.Failure -> {
+                    Log.e("SignUp", "${signUpState.error}")
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -82,16 +142,27 @@ fun SignUpScreen(navController: NavHostController) {
                     style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                SignUpEmailValidationMessage(text = "")
+                SignUpEmailValidationMessage(
+                    text = emailValidation.value,
+                    isEmailVerified = isEmailVerified
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 Box(modifier = Modifier.weight(3f)) {
-                    SignUpEmailTextField(email = email, onValueChange = { email = it })
+                    SignUpEmailTextField(
+                        email = email,
+                        onValueChange = { email = it },
+                        enabled = !isEmailLoading && !isEmailVerified
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    SignUpEmailValidationButton(onClick = {})
+                    SignUpEmailValidationButton(
+                        onClick = {
+                            coroutineScope.launch { signUpViewModel.validateEmail(email) }
+                        }, enabled = !isEmailLoading && !isEmailVerified
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(28.dp))
@@ -103,16 +174,29 @@ fun SignUpScreen(navController: NavHostController) {
                     style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                SignUpNameValidationMessage(text = "")
+                SignUpNameValidationMessage(
+                    text = nameValidation.value,
+                    isNameVerified = isNameVerified
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 Box(modifier = Modifier.weight(3f)) {
-                    SignUpNameTextField(name = email, onValueChange = { name = it })
+                    SignUpNameTextField(
+                        name = name,
+                        onValueChange = { name = it },
+                        enabled = !isNameLoading && !isNameVerified
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    SignUpNameDuplicateCheckButton(onClick = {})
+                    SignUpNameDuplicateCheckButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                signUpViewModel.validateName(name)
+                            }
+                        }, enabled = !isNameLoading && !isNameVerified
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(28.dp))
@@ -124,7 +208,7 @@ fun SignUpScreen(navController: NavHostController) {
                     style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                SignUpPasswordValidationMessage(text = "")
+                SignUpPasswordValidationMessage(text = passwordValidation.value)
             }
             Spacer(modifier = Modifier.height(8.dp))
             SignUpPasswordTextField(password = password, onValueChange = { password = it })
@@ -137,7 +221,7 @@ fun SignUpScreen(navController: NavHostController) {
                     style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                SignUpPasswordCheckValidationMessage(text = "")
+                SignUpPasswordCheckValidationMessage(text = passwordCheckValidation.value)
             }
             Spacer(modifier = Modifier.height(8.dp))
             SignUpPasswordCheckTextField(
@@ -152,67 +236,90 @@ fun SignUpScreen(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Box(modifier = Modifier.weight(1f)) {
-                Button(
-                    text = "회원가입",
-                    onClick = { /*TODO*/ },
-                    background = CustomTheme.colors.skyBlue
+                SignUpSubmitButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            signUpViewModel.signUpSubmitBtnAction(
+                                email = email,
+                                name = name,
+                                password = password,
+                                passwordCheck = passwordCheck
+                            )
+                        }
+                    },
+                    enabled = isEmailVerified && isNameVerified && password.isNotEmpty() && passwordCheck.isNotEmpty()
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Box(modifier = Modifier.weight(1f)) {
-                Button(
-                    text = "가입 취소",
-                    onClick = { navController.popBackStack() },
-                    background = CustomTheme.colors.orange
-                )
+                SignUpCancelButton(onClick = {
+                    signUpViewModel.deleteTempAccount()
+                    navController.popBackStack()
+                })
             }
         }
     }
 }
 
 @Composable
-fun SignUpEmailValidationMessage(text: String) {
+fun SignUpEmailValidationMessage(text: String, isEmailVerified: Boolean) {
+    val colors = CustomTheme.colors
+    val textColor = if (isEmailVerified) colors.check else colors.error
     Text(
         text = text,
-        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+        style = CustomTheme.typography.caption1.copy(color = textColor)
     )
 }
 
 @Composable
-fun SignUpEmailTextField(email: String, onValueChange: (String) -> Unit) {
+fun SignUpEmailTextField(email: String, onValueChange: (String) -> Unit, enabled: Boolean) {
     OutlinedTextField(
         value = email,
         onValueChange = { onValueChange(it) },
-        hint = "이메일 입력"
+        hint = "이메일 입력",
+        enabled = enabled
     )
 }
 
 @Composable
-fun SignUpEmailValidationButton(onClick: () -> Unit) {
-    OutlinedButton(onClick = {}, text = "인증 요청", buttonColor = CustomTheme.colors.skyBlue)
+fun SignUpEmailValidationButton(onClick: () -> Unit, enabled: Boolean) {
+    OutlinedButton(
+        onClick = onClick,
+        text = "인증 요청",
+        color = CustomTheme.colors.skyBlue,
+        enabled = enabled
+    )
 }
 
 @Composable
-fun SignUpNameValidationMessage(text: String) {
+fun SignUpNameValidationMessage(text: String, isNameVerified: Boolean) {
     Text(
         text = text,
-        style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
+        style = CustomTheme.typography.caption1.copy(
+            color = if (isNameVerified) CustomTheme.colors.check else CustomTheme.colors.error
+        )
     )
 }
 
 @Composable
-fun SignUpNameTextField(name: String, onValueChange: (String) -> Unit) {
+fun SignUpNameTextField(name: String, onValueChange: (String) -> Unit, enabled: Boolean) {
     OutlinedTextField(
         value = name,
         onValueChange = { onValueChange(it) },
         maxLength = 10,
-        hint = "이름 입력 (10자 제한)"
+        hint = "이름 입력 (10자 제한)",
+        enabled = enabled
     )
 }
 
 @Composable
-fun SignUpNameDuplicateCheckButton(onClick: () -> Unit) {
-    OutlinedButton(onClick = {}, text = "중복 확인", buttonColor = CustomTheme.colors.orange)
+fun SignUpNameDuplicateCheckButton(onClick: () -> Unit, enabled: Boolean) {
+    OutlinedButton(
+        onClick = onClick,
+        text = "중복 확인",
+        color = CustomTheme.colors.orange,
+        enabled = enabled
+    )
 }
 
 @Composable
@@ -249,6 +356,25 @@ fun SignUpPasswordCheckTextField(passwordCheck: String, onValueChange: (String) 
         hint = "비밀번호 재입력 ",
         isPassword = true,
         isLast = true
+    )
+}
+
+@Composable
+fun SignUpSubmitButton(onClick: () -> Unit, enabled: Boolean) {
+    Button(
+        text = "회원가입",
+        onClick = onClick,
+        background = CustomTheme.colors.skyBlue,
+        enabled = enabled
+    )
+}
+
+@Composable
+fun SignUpCancelButton(onClick: () -> Unit) {
+    Button(
+        text = "가입 취소",
+        onClick = onClick,
+        background = CustomTheme.colors.orange
     )
 }
 

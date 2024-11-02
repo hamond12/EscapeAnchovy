@@ -2,6 +2,7 @@ package com.hamond.escapeanchovy.presentation.ui.components
 
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,8 +21,11 @@ import com.hamond.escapeanchovy.ui.theme.CustomTheme
 fun OutlinedButton(
     onClick: () -> Unit,
     text: String,
-    buttonColor: Color
+    color: Color,
+    enabled: Boolean = true
 ) {
+    val buttonColor = if (enabled) color else CustomTheme.colors.disabled.copy().copy(alpha = 0.5f)
+
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier
@@ -32,8 +36,9 @@ fun OutlinedButton(
         shape = RoundedCornerShape(5.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = CustomTheme.colors.background,
-            contentColor = CustomTheme.colors.skyBlue,
-        )
+            disabledContainerColor = CustomTheme.colors.background.copy(alpha = 0.5f)
+        ),
+        enabled = enabled,
     ) {
         Text(
             text = text,
@@ -45,5 +50,10 @@ fun OutlinedButton(
 @Preview(showBackground = true)
 @Composable
 fun PreviewOutlinedButton() {
-    OutlinedButton(onClick = {}, text = "인증 요청", buttonColor = CustomTheme.colors.skyBlue)
+    OutlinedButton(
+        onClick = {},
+        text = "인증 요청",
+        color = CustomTheme.colors.skyBlue,
+        enabled = false
+    )
 }

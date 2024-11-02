@@ -31,7 +31,7 @@ class KakaoLoginRepositoryImpl @Inject constructor():KakaoLoginRepository {
                 } else {
                     val email = user?.kakaoAccount?.email ?: ""
                     val name = user?.kakaoAccount?.profile?.nickname ?: ""
-                    continuation.resume(User(email, name))
+                    continuation.resume(User(email, name, ""))
                 }
             }
         }

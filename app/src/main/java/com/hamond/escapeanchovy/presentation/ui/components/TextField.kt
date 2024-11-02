@@ -1,6 +1,7 @@
 package com.hamond.escapeanchovy.presentation.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
+import kotlin.math.sin
 
 @Composable
 fun TextField(
@@ -43,8 +46,13 @@ fun TextField(
     isLast: Boolean = false,
     maxLength: Int = 50
 ) {
-    var isPasswordHidden by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
+    var isPasswordHidden by remember { mutableStateOf(true) }
+
+    val visualTransformation =
+        if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None
+    val visibleIcon =
+        if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility
 
     Box {
         Row(
@@ -54,9 +62,11 @@ fun TextField(
             Svg(drawableId = drawableId, startPadding = 4.dp, isIcon = true)
             BasicTextField(
                 value = value,
-                textStyle = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.text),
+                textStyle = CustomTheme.typography.b4Regular.copy(
+                    color = CustomTheme.colors.text
+                ),
                 onValueChange = {
-                    if (it.length <= maxLength && it.all { char -> !char.isWhitespace() }) {
+                    if (it.length <= maxLength && it.all { c -> !c.isWhitespace() }) {
                         onValueChange(it)
                     }
                 },
@@ -76,20 +86,22 @@ fun TextField(
                         if (value.isEmpty()) {
                             Text(
                                 text = hint,
-                                style = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.hint),
+                                style = CustomTheme.typography.b4Regular.copy(
+                                    color = CustomTheme.colors.hint
+                                ),
                             )
                         }
                         innerTextField()
                     }
                 },
-                visualTransformation = if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                visualTransformation = visualTransformation,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = if (isLast) ImeAction.Done else ImeAction.Next
                 ),
             )
             if (isPassword) {
                 Svg(
-                    drawableId = if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility,
+                    drawableId = visibleIcon,
                     onClick = { isPasswordHidden = !isPasswordHidden },
                     size = 20.dp,
                     isIcon = true

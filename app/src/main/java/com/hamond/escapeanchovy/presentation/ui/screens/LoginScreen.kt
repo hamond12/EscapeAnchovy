@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +41,8 @@ import com.hamond.escapeanchovy.presentation.ui.components.TextField
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
+import com.hamond.escapeanchovy.utils.AccountUtils.saveAutoLogin
 import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
-import com.hamond.escapeanchovy.utils.AccountUtils.setAutoLogin
 import kotlinx.coroutines.launch
 
 @Composable
@@ -57,7 +56,6 @@ fun LoginScreen(navController: NavHostController) {
     val focusManager = LocalFocusManager.current
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
-    //val loginState by loginViewModel.loginState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -70,16 +68,16 @@ fun LoginScreen(navController: NavHostController) {
         loginViewModel.loginState.collect { loginState ->
             when (loginState) {
                 is LoginState.Init -> {}
-                is LoginState.Failure -> {
-                    Log.e("Login", "${loginState.error}")
-                }
                 is LoginState.Success -> {
-                    if (isSocialLogin || isAutoLogin) setAutoLogin(context)
+                    if (isSocialLogin || isAutoLogin) saveAutoLogin(context, true)
                     saveUserEmail(context, loginState.email)
                     loginViewModel.initLoginResult()
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
+                }
+                is LoginState.Failure -> {
+                    Log.e("Login", "${loginState.error}")
                 }
             }
         }
@@ -154,19 +152,19 @@ fun LoginScreen(navController: NavHostController) {
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.googleLogin(context)
+                    loginViewModel.googleLogin()
                 }
             })
             Spacer(modifier = Modifier.width(40.dp))
             KakaoLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.kakaoLogin(context)
+                    loginViewModel.kakaoLogin()
                 }
             })
             Spacer(modifier = Modifier.width(40.dp))
             NaverLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.naverLogin(context)
+                    loginViewModel.naverLogin()
                 }
             })
         }
@@ -245,7 +243,7 @@ fun SocialLoginText(){
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Line(width = 82.dp, color = CustomTheme.colors.hint)
+        Line(width = 82.dp, color = CustomTheme.colors.disabled)
         Row {
             Text(
                 text = "SNS 계정",
@@ -264,7 +262,7 @@ fun SocialLoginText(){
                 style = CustomTheme.typography.b3Regular.copy(color = CustomTheme.colors.text)
             )
         }
-        Line(width = 82.dp, color = CustomTheme.colors.hint)
+        Line(width = 82.dp, color = CustomTheme.colors.disabled)
     }
 }
 

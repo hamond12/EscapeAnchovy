@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -37,14 +38,25 @@ fun OutlinedTextField(
     hint: String,
     isPassword: Boolean = false,
     isLast: Boolean = false,
-    maxLength: Int = 50
+    maxLength: Int = 50,
+    enabled: Boolean = true
 ) {
     var isPasswordHidden by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
+    val textColor =
+        if (enabled) CustomTheme.colors.text else CustomTheme.colors.disabled.copy(alpha = 0.5f)
+    val borderColor =
+        if (enabled) CustomTheme.colors.border else CustomTheme.colors.disabled.copy(alpha = 0.5f)
+
+    val visualTransformation =
+        if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None
+    val visibleIcon =
+        if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility
+
     Box(
         modifier = Modifier
-            .border(1.dp, CustomTheme.colors.border, shape = RoundedCornerShape(5.dp))
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(5.dp))
             .background(CustomTheme.colors.background)
     ) {
         Row(
@@ -52,14 +64,16 @@ fun OutlinedTextField(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             BasicTextField(
+                enabled = enabled,
                 value = value,
-                textStyle = CustomTheme.typography.b4Regular,
+                textStyle = CustomTheme.typography.b4Regular.copy(color = textColor),
                 onValueChange = {
-                    if (it.length <= maxLength && it.all { char -> !char.isWhitespace() }) {
+                    if (it.length <= maxLength && it.all { c -> !c.isWhitespace() }) {
                         onValueChange(it)
                     }
                 },
                 maxLines = 1,
+                cursorBrush = SolidColor(CustomTheme.colors.text),
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
@@ -74,21 +88,23 @@ fun OutlinedTextField(
                         if (value.isEmpty()) {
                             Text(
                                 text = hint,
-                                style = CustomTheme.typography.b4Regular.copy(color = CustomTheme.colors.hint),
+                                style = CustomTheme.typography.b4Regular.copy(
+                                    color = CustomTheme.colors.hint
+                                ),
                             )
                         }
                         innerTextField()
                     }
                 },
-                visualTransformation = if (isPassword && isPasswordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                visualTransformation = visualTransformation,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = if(isLast) ImeAction.Done else ImeAction.Next
+                    imeAction = if (isLast) ImeAction.Done else ImeAction.Next
                 ),
 
-            )
+                )
             if (isPassword) {
                 Svg(
-                    drawableId = if (isPasswordHidden) R.drawable.ic_visibility_off else R.drawable.ic_visibility,
+                    drawableId = visibleIcon,
                     onClick = { isPasswordHidden = !isPasswordHidden },
                     size = 20.dp,
                     isIcon = true

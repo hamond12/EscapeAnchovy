@@ -30,7 +30,7 @@ fun Button(
             .height(48.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            disabledContainerColor = CustomTheme.colors.hint,
+            disabledContainerColor = CustomTheme.colors.disabled,
             containerColor = background
         )
     ) {

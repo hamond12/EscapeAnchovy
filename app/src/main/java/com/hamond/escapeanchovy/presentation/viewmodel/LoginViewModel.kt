@@ -15,12 +15,15 @@ import com.hamond.escapeanchovy.data.repository.naverLogin.NaverLoginRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val googleLoginRepository: GoogleLoginRepository,
     private val kakaoLoginRepository: KakaoLoginRepository,
     private val naverLoginRepository: NaverLoginRepository,
@@ -28,9 +31,9 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
-    val loginState = _loginState.asStateFlow()
+    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
-    suspend fun googleLogin(context: Context) {
+    suspend fun googleLogin() {
         val credentialManager = CredentialManager.create(context)
         val request = googleLoginRepository.createCredentialRequest()
 
@@ -42,7 +45,7 @@ class LoginViewModel @Inject constructor(
             if (error is GetCredentialCancellationException) {
                 // 로그인 취소 시에는 아무것도 하지 않음
             } else {
-                openGoogleAccountSetting(context)
+                openGoogleLoginScreen()
             }
         }
     }
@@ -57,13 +60,15 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun openGoogleAccountSetting(context: Context) {
-        val intent = Intent(ACTION_ADD_ACCOUNT)
-        intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+    private fun openGoogleLoginScreen() {
+        val intent = Intent(ACTION_ADD_ACCOUNT).apply {
+            putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
         context.startActivity(intent)
     }
 
-    suspend fun kakaoLogin(context: Context) {
+    suspend fun kakaoLogin() {
         try {
             kakaoLoginRepository.loginWithKakaoAccount(context)
             val user = kakaoLoginRepository.getKakaoUser()
@@ -73,7 +78,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    suspend fun naverLogin(context: Context) {
+    suspend fun naverLogin() {
         try {
             val accessToken = naverLoginRepository.loginWithNaverAccount(context)
             val user = naverLoginRepository.getNaverUser(accessToken)

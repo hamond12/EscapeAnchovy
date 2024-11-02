@@ -62,7 +62,7 @@ class NaverLoginRepositoryImpl @Inject constructor() : NaverLoginRepository {
                         val user = jsonObject.getJSONObject("response")
                         val email = user.getString("email")
                         val name = user.getString("name")
-                        continuation.resume(User(email, name))
+                        continuation.resume(User(email, name, ""))
                     }
                 }
 

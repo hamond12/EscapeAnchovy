@@ -31,6 +31,7 @@ fun Checkbox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val checkBoxColor = if (isChecked) CustomTheme.colors.skyBlue else CustomTheme.colors.background
 
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Box(
@@ -38,12 +39,12 @@ fun Checkbox(
                 .size(18.dp)
                 .clickable { onCheckedChange(!isChecked) }
                 .background(
-                    color = if (isChecked) CustomTheme.colors.skyBlue else CustomTheme.colors.background,
+                    color = checkBoxColor,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .then(
                     if (!isChecked) {
-                        Modifier.border(1.dp, CustomTheme.colors.hint, RoundedCornerShape(4.dp))
+                        Modifier.border(1.dp, CustomTheme.colors.disabled, RoundedCornerShape(4.dp))
                     } else {
                         Modifier
                     }

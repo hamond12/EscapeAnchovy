@@ -53,7 +53,7 @@ class GoogleLoginRepositoryImpl @Inject constructor(
             val authResult = auth.signInWithCredential(firebaseCredential).await()
             val email = authResult.user?.email ?: ""
             val name = authResult.user?.displayName ?: ""
-            User(email, name)
+            User(email, name, "")
         } catch (e: Exception) {
             throw Exception(e.message)
         }

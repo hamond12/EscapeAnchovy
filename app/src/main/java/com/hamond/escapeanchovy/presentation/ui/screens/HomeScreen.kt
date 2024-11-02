@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.constants.Routes
-import com.hamond.escapeanchovy.utils.AccountUtils.cancelAutoLogin
 import com.hamond.escapeanchovy.utils.AccountUtils.getUserEmail
+import com.hamond.escapeanchovy.utils.AccountUtils.saveAutoLogin
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -28,7 +28,7 @@ fun HomeScreen(navController: NavHostController) {
     ) {
         Text(text = "email: $email")
         Button(onClick = {
-            cancelAutoLogin(context)
+            saveAutoLogin(context, false)
             navController.navigate(Routes.LOGIN) {
                 popUpTo(Routes.HOME) { inclusive = true }
             }
