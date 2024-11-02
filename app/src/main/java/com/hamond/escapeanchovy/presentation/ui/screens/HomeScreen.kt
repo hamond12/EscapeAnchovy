@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.constants.Routes
-import com.hamond.escapeanchovy.utils.AccountUtils.getUserEmail
-import com.hamond.escapeanchovy.utils.AccountUtils.saveAutoLogin
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.getUserEmail
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveAutoLogin
 
 @Composable
 fun HomeScreen(navController: NavHostController) {

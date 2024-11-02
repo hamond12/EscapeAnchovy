@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val googleLoginRepository: GoogleLoginRepository,
     private val kakaoLoginRepository: KakaoLoginRepository,
     private val naverLoginRepository: NaverLoginRepository,
@@ -33,7 +32,7 @@ class LoginViewModel @Inject constructor(
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
-    suspend fun googleLogin() {
+    suspend fun googleLogin(context: Context) {
         val credentialManager = CredentialManager.create(context)
         val request = googleLoginRepository.createCredentialRequest()
 
@@ -45,7 +44,7 @@ class LoginViewModel @Inject constructor(
             if (error is GetCredentialCancellationException) {
                 // 로그인 취소 시에는 아무것도 하지 않음
             } else {
-                openGoogleLoginScreen()
+                openGoogleLoginScreen(context)
             }
         }
     }
@@ -60,15 +59,13 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun openGoogleLoginScreen() {
-        val intent = Intent(ACTION_ADD_ACCOUNT).apply {
-            putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+    private fun openGoogleLoginScreen(context: Context) {
+        val intent = Intent(ACTION_ADD_ACCOUNT)
+        intent.putExtra(EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
         context.startActivity(intent)
     }
 
-    suspend fun kakaoLogin() {
+    suspend fun kakaoLogin(context: Context) {
         try {
             kakaoLoginRepository.loginWithKakaoAccount(context)
             val user = kakaoLoginRepository.getKakaoUser()
@@ -78,7 +75,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    suspend fun naverLogin() {
+    suspend fun naverLogin(context: Context) {
         try {
             val accessToken = naverLoginRepository.loginWithNaverAccount(context)
             val user = naverLoginRepository.getNaverUser(accessToken)

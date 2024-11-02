@@ -33,6 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.constants.Routes
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveAutoLogin
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.Checkbox
 import com.hamond.escapeanchovy.presentation.ui.components.Line
@@ -41,8 +43,6 @@ import com.hamond.escapeanchovy.presentation.ui.components.TextField
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
-import com.hamond.escapeanchovy.utils.AccountUtils.saveAutoLogin
-import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
 import kotlinx.coroutines.launch
 
 @Composable
@@ -152,19 +152,19 @@ fun LoginScreen(navController: NavHostController) {
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             GoogleLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.googleLogin()
+                    loginViewModel.googleLogin(context)
                 }
             })
             Spacer(modifier = Modifier.width(40.dp))
             KakaoLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.kakaoLogin()
+                    loginViewModel.kakaoLogin(context)
                 }
             })
             Spacer(modifier = Modifier.width(40.dp))
             NaverLoginButton(onClick = {
                 coroutineScope.launch {
-                    loginViewModel.naverLogin()
+                    loginViewModel.naverLogin(context)
                 }
             })
         }

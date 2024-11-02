@@ -1,7 +1,6 @@
 package com.hamond.escapeanchovy.presentation.viewmodel
 
 import android.content.Context
-import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,9 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.hamond.escapeanchovy.data.model.User
 import com.hamond.escapeanchovy.data.repository.auth.AuthRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.getUserEmail
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.state.SignUpState
-import com.hamond.escapeanchovy.utils.AccountUtils.getUserEmail
-import com.hamond.escapeanchovy.utils.AccountUtils.saveUserEmail
+import com.hamond.escapeanchovy.utils.AccountUtils.hashPassword
+import com.hamond.escapeanchovy.utils.AccountUtils.isValidEmail
+import com.hamond.escapeanchovy.utils.AccountUtils.isValidName
+import com.hamond.escapeanchovy.utils.AccountUtils.isValidPassword
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -19,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,28 +53,6 @@ class SignUpViewModel @Inject constructor(
 
     private var isPasswordValid = false
     private var isPasswordCheckValid = false
-
-    private fun isValidEmail(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    private fun isValidName(name: String): Boolean {
-        val regex = "^[a-zA-Z0-9\\s가-힣ㄱ-ㅎㅏ-ㅣ]*$".toRegex()
-        return regex.matches(name)
-    }
-
-    private fun isValidPassword(password: String): Boolean {
-        val regex =
-            "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,20}$".toRegex()
-        return regex.matches(password)
-    }
-
-    fun hashPassword(password: String): String {
-        val data = password.toByteArray()
-        val sha256 = MessageDigest.getInstance("SHA-256")
-        val hashValue = sha256.digest(data)
-        return hashValue.joinToString("") { "%02x".format(it) }
-    }
 
     suspend fun validateEmail(email: String) {
         when {
