@@ -84,7 +84,7 @@ class SignUpViewModel @Inject constructor(
                 checkEmailVerification()
             }
         } catch (e: Exception) {
-            _signUpState.value = SignUpState.Failure(e.message)
+            _signUpState.value = SignUpState.Error(e.message)
         }
     }
 
@@ -174,7 +174,7 @@ class SignUpViewModel @Inject constructor(
                 isNameVerified = true
             }
         } catch (e: Exception) {
-            _signUpState.value = SignUpState.Failure(e.message)
+            _signUpState.value = SignUpState.Error(e.message)
         }
     }
 
@@ -218,7 +218,7 @@ class SignUpViewModel @Inject constructor(
         try {
             storeRepository.saveAccountInfo(user)
         } catch (e: Exception) {
-            _signUpState.value = SignUpState.Failure(e.message)
+            _signUpState.value = SignUpState.Error(e.message)
         }
     }
 
@@ -229,7 +229,7 @@ class SignUpViewModel @Inject constructor(
                 authRepository.loginTempAccount(inputEmail)
                 authRepository.deleteTempAccount()
             } catch (e: Exception) {
-                _signUpState.value = SignUpState.Failure(e.message)
+                _signUpState.value = SignUpState.Error(e.message)
             }
         }
     }

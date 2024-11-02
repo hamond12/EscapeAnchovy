@@ -13,6 +13,7 @@ import com.hamond.escapeanchovy.data.repository.googleLogin.GoogleLoginRepositor
 import com.hamond.escapeanchovy.data.repository.kakaoLogin.KakaoLoginRepository
 import com.hamond.escapeanchovy.data.repository.naverLogin.NaverLoginRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
+import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,6 +32,19 @@ class LoginViewModel @Inject constructor(
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+
+    suspend fun login(email: String, password: String) {
+        try {
+            val isLogin = storeRepository.isLoginSuccess(email, password)
+            if (isLogin) {
+                _loginState.value = LoginState.Success(email)
+            } else {
+                _loginState.value = LoginState.Failure
+            }
+        } catch (e: Exception) {
+            _loginState.value = LoginState.Error(e.message)
+        }
+    }
 
     suspend fun googleLogin(context: Context) {
         val credentialManager = CredentialManager.create(context)
@@ -53,9 +67,9 @@ class LoginViewModel @Inject constructor(
         try {
             val credential = googleLoginRepository.checkCredentialType(result)
             val user = googleLoginRepository.loginWithCredential(credential)
-            handleLoginSuccess(user)
+            socialLoginSuccess(user)
         } catch (e: Exception) {
-            _loginState.value = LoginState.Failure(e.message)
+            _loginState.value = LoginState.Error(e.message)
         }
     }
 
@@ -69,9 +83,9 @@ class LoginViewModel @Inject constructor(
         try {
             kakaoLoginRepository.loginWithKakaoAccount(context)
             val user = kakaoLoginRepository.getKakaoUser()
-            handleLoginSuccess(user)
+            socialLoginSuccess(user)
         } catch (e: Exception) {
-            _loginState.value = LoginState.Failure(e.message)
+            _loginState.value = LoginState.Error(e.message)
         }
     }
 
@@ -79,13 +93,13 @@ class LoginViewModel @Inject constructor(
         try {
             val accessToken = naverLoginRepository.loginWithNaverAccount(context)
             val user = naverLoginRepository.getNaverUser(accessToken)
-            handleLoginSuccess(user)
+            socialLoginSuccess(user)
         } catch (e: Exception) {
-            _loginState.value = LoginState.Failure(e.message)
+            _loginState.value = LoginState.Error(e.message)
         }
     }
 
-    private suspend fun handleLoginSuccess(user: User) {
+    private suspend fun socialLoginSuccess(user: User) {
         storeRepository.saveAccountInfo(user)
         _loginState.value = LoginState.Success(user.email)
     }

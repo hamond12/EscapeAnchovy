@@ -7,5 +7,5 @@ sealed class SignUpState {
     data object EmailVerified : SignUpState()
     data object NameVerified: SignUpState()
     data object SignUp: SignUpState()
-    data class Failure(val error: String?) : SignUpState()
+    data class Error(val error: String?) : SignUpState()
 }

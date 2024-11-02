@@ -43,6 +43,7 @@ import com.hamond.escapeanchovy.presentation.ui.components.TextField
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import com.hamond.escapeanchovy.presentation.viewmodel.LoginViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
+import com.hamond.escapeanchovy.utils.CommonUtils.showToast
 import kotlinx.coroutines.launch
 
 @Composable
@@ -67,17 +68,35 @@ fun LoginScreen(navController: NavHostController) {
     LaunchedEffect(Unit) {
         loginViewModel.loginState.collect { loginState ->
             when (loginState) {
-                is LoginState.Init -> {}
+                is LoginState.Init -> {
+
+                }
+
                 is LoginState.Success -> {
-                    if (isSocialLogin || isAutoLogin) saveAutoLogin(context, true)
+                    // 자동 로그인 설정
+                    if (isSocialLogin || isAutoLogin) {
+                        saveAutoLogin(context, true)
+                    }
+
+                    // 사용자 이메일 저장
                     saveUserEmail(context, loginState.email)
+
+                    // 로그인 결과 초기화
                     loginViewModel.initLoginResult()
+
+                    // 홈 화면으로 네비게이션
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
-                is LoginState.Failure -> {
+
+                is LoginState.Error -> {
                     Log.e("Login", "${loginState.error}")
+                }
+
+                is LoginState.Failure -> {
+                    showToast(context, "로그인 정보가 일치하지 않습니다.")
+                    loginViewModel.initLoginResult()
                 }
             }
         }
@@ -138,6 +157,9 @@ fun LoginScreen(navController: NavHostController) {
             LoginButton(
                 onClick = {
                     isSocialLogin = false
+                    coroutineScope.launch {
+                        loginViewModel.login(email, password)
+                    }
                 },
                 enabled = email.isNotBlank() && password.isNotBlank()
             )
@@ -235,7 +257,7 @@ fun SignUpButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun SocialLoginText(){
+fun SocialLoginText() {
     Row(
         Modifier
             .fillMaxWidth()
