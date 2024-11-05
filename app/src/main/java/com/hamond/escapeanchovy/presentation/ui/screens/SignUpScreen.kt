@@ -28,12 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedButton
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedTextField
@@ -376,11 +373,4 @@ fun SignUpCancelButton(onClick: () -> Unit) {
         onClick = onClick,
         background = CustomTheme.colors.orange
     )
-}
-
-
-@Preview(showBackground = true, device = Devices.PIXEL_2)
-@Composable
-fun PreviewSignUpScreen() {
-    SignUpScreen(rememberNavController())
 }

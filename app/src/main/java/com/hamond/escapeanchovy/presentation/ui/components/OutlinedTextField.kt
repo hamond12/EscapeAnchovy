@@ -56,7 +56,7 @@ fun OutlinedTextField(
 
     Box(
         modifier = Modifier
-            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(5.dp))
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(4.dp))
             .background(CustomTheme.colors.background)
     ) {
         Row(

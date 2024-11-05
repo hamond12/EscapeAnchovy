@@ -33,7 +33,7 @@ fun OutlinedButton(
             .height(48.dp),
         contentPadding = PaddingValues(0.dp),
         border = BorderStroke(width = 1.dp, color = buttonColor),
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(4.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = CustomTheme.colors.background,
             disabledContainerColor = CustomTheme.colors.background.copy(alpha = 0.5f)

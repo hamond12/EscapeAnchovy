@@ -28,7 +28,7 @@ fun Button(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
             disabledContainerColor = CustomTheme.colors.disabled,
             containerColor = background
