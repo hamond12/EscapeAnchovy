@@ -159,13 +159,13 @@ fun PreviewSignUpScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Box(modifier = Modifier.weight(1f)) {
-                SignUpSubmitButton(
-                    onClick = {}, enabled = true
-                )
+                SignUpCancelButton(onClick = {})
             }
             Spacer(modifier = Modifier.width(16.dp))
             Box(modifier = Modifier.weight(1f)) {
-                SignUpCancelButton(onClick = {})
+                SignUpSubmitButton(
+                    onClick = {}, enabled = true
+                )
             }
         }
     }

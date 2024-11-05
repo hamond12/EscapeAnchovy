@@ -9,15 +9,16 @@ class CustomColorScheme(
     background: Color,
     text: Color,
     subText: Color,
-    hint: Color,
-    disabled: Color,
+    buttonText: Color,
     icon: Color,
     border: Color,
-    buttonText: Color,
+    hint: Color,
+    disabled: Color,
     skyBlue: Color,
     orange: Color,
     error: Color,
-    check: Color
+    check: Color,
+    lightGray: Color
 ) {
     var background by mutableStateOf(background)
         private set
@@ -25,15 +26,15 @@ class CustomColorScheme(
         private set
     var subText by mutableStateOf(subText)
         private set
-    var hint by mutableStateOf(hint)
-        private set
-    var disabled by mutableStateOf(disabled)
+    var buttonText by mutableStateOf(buttonText)
         private set
     var icon by mutableStateOf(icon)
         private set
     var border by mutableStateOf(border)
         private set
-    var buttonText by mutableStateOf(buttonText)
+    var hint by mutableStateOf(hint)
+        private set
+    var disabled by mutableStateOf(disabled)
         private set
     var skyBlue by mutableStateOf(skyBlue)
         private set
@@ -43,6 +44,8 @@ class CustomColorScheme(
         private set
     var check by mutableStateOf(check)
         private set
+    var lightGray by mutableStateOf(lightGray)
+        private set
 }
 
 val customLightColorScheme by lazy {
@@ -50,15 +53,16 @@ val customLightColorScheme by lazy {
         background = Color(0xFFF9F9F9),
         text = Color(0xFF2A2A2A),
         subText = Color(0xFF585858),
-        hint = Color(0xFF9F9F9F),
-        disabled = Color(0xFF9F9F9F).copy(alpha = 0.5f),
+        buttonText = Color(0xFFFFFFFF),
         icon = Color(0xFF757575),
         border = Color(0xFF8A848D),
-        buttonText = Color(0xFFFFFFFF),
+        hint = Color(0xFF9F9F9F),
+        disabled = Color(0xFF9F9F9F).copy(alpha = 0.5f),
         skyBlue = Color(0xFF00B6EF),
         orange = Color(0xFFFFB020),
         error = Color(0xFFFF5555),
-        check = Color(0xFF13BA00)
+        check = Color(0xFF13BA00),
+        lightGray = Color(0xFFE5E5E5)
     )
 }
 
@@ -75,6 +79,7 @@ val customDarkColorScheme by lazy {
         skyBlue = Color(0xFF00ACE5),
         orange = Color(0xFFE19214),
         error = Color(0xFFFF5555),
-        check = Color(0xFF14A614)
+        check = Color(0xFF14A614),
+        lightGray = Color(0xFF505050)
     )
 }

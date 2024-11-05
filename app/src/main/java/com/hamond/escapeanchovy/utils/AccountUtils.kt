@@ -1,11 +1,7 @@
 package com.hamond.escapeanchovy.utils
 
-import android.content.Context
 import android.util.Patterns
-import androidx.core.content.edit
-import com.hamond.escapeanchovy.constants.PrefsName.ACCOUNT_PREFS
 import java.security.MessageDigest
-
 
 object AccountUtils{
     fun isValidEmail(email: String): Boolean {
@@ -19,7 +15,7 @@ object AccountUtils{
 
     fun isValidPassword(password: String): Boolean {
         val regex =
-            "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?]).{8,20}$".toRegex()
+            "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"|,.<>/?]).{8,20}$".toRegex()
         return regex.matches(password)
     }
 

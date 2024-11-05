@@ -1,7 +1,6 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.constants.Routes
+import com.hamond.escapeanchovy.constants.Routes.HOME
+import com.hamond.escapeanchovy.constants.Routes.LOGIN
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveAutoLogin
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.components.Button
@@ -49,30 +50,43 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(navController: NavHostController) {
 
+    // 화면 테마 별로 다른 svg 설정
     val darkTheme = isSystemInDarkTheme()
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
 
-    val context = LocalContext.current
+    // 화면 높이가 모자란 경우를 대비
+    val scrollState = rememberScrollState()
+
+    // 텍스트필드 사용 후 포커스 초기화를 위해 사용
     val focusManager = LocalFocusManager.current
 
-    val loginViewModel = hiltViewModel<LoginViewModel>()
+    // 컴포즈 UI의 컨텍스트를 사용해야 뷰모델 함수가 오류 안남
+    val context = LocalContext.current
 
+    // 뷰모델 관련 변수 선언
+    val loginViewModel = hiltViewModel<LoginViewModel>()
+    val coroutineScope = rememberCoroutineScope()
+
+    // 사용자 입력값들
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // 자동 로그인 여부 컨트롤 변수
     var isSocialLogin by remember { mutableStateOf(true) }
     var isAutoLogin by remember { mutableStateOf(false) }
 
-
+    // 로그인 상태별 동작 정의
     LaunchedEffect(Unit) {
         loginViewModel.loginState.collect { loginState ->
             when (loginState) {
-                is LoginState.Init -> {
 
+                // 초기 상태
+                is LoginState.Init -> {
+                    // (아무런 동작을 하지 않음)
                 }
 
+                // 로그인 성공 시
                 is LoginState.Success -> {
+
                     // 자동 로그인 설정
                     if (isSocialLogin || isAutoLogin) {
                         saveAutoLogin(context, true)
@@ -81,20 +95,24 @@ fun LoginScreen(navController: NavHostController) {
                     // 사용자 이메일 저장
                     saveUserEmail(context, loginState.email)
 
-                    // 로그인 결과 초기화
+                    // 로그인 상태 초기화
                     loginViewModel.initLoginResult()
 
-                    // 홈 화면으로 네비게이션
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    // 홈 화면으로 라우팅
+                    navController.navigate(HOME) {
+                        popUpTo(LOGIN) { inclusive = true }
                     }
                 }
 
+                // 비동기 작업 오류 발생 시
                 is LoginState.Error -> {
+                    // 디버깅을 위한 에러 로그 출력하기
                     Log.e("Login", "${loginState.error}")
                 }
 
+                // 로그인 실패 시 (유저 정보 불일치)
                 is LoginState.Failure -> {
+                    // 토스트 메시지를 띄워 사용자에게 로그인 실패를 알림
                     showToast(context, "로그인 정보가 일치하지 않습니다.")
                     loginViewModel.initLoginResult()
                 }
@@ -105,7 +123,6 @@ fun LoginScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CustomTheme.colors.background)
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
