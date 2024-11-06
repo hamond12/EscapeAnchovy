@@ -19,7 +19,7 @@ import com.hamond.escapeanchovy.ui.theme.CustomTheme
 fun Button(
     text: String,
     onClick: () -> Unit,
-    background: Color,
+    color: Color,
     enabled: Boolean = true,
 ) {
     Button(
@@ -31,7 +31,7 @@ fun Button(
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
             disabledContainerColor = CustomTheme.colors.disabled,
-            containerColor = background
+            containerColor = color
         )
     ) {
         Text(
@@ -51,6 +51,6 @@ fun PreviewCustomButton() {
     Button(
         text = "버튼",
         onClick = {},
-        background = CustomTheme.colors.skyBlue
+        color = CustomTheme.colors.skyBlue
     )
 }

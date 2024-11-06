@@ -10,13 +10,8 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +23,7 @@ import com.hamond.escapeanchovy.utils.NoRippleTheme
 @Composable
 fun Checkbox(
     isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    onClick: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val checkBoxColor = if (isChecked) CustomTheme.colors.skyBlue else CustomTheme.colors.background
@@ -37,7 +32,7 @@ fun Checkbox(
         Box(
             modifier = modifier
                 .size(18.dp)
-                .clickable { onCheckedChange(!isChecked) }
+                .clickable { onClick(!isChecked) }
                 .background(
                     color = checkBoxColor,
                     shape = RoundedCornerShape(4.dp)
@@ -53,7 +48,7 @@ fun Checkbox(
             if (isChecked) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_check),
-                    tint = Color.White,
+                    tint = CustomTheme.colors.background,
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -65,10 +60,9 @@ fun Checkbox(
 @Preview(showBackground = true)
 @Composable
 fun PreviewSimpleScreen() {
-    var isChecked by remember { mutableStateOf(false) }
     Checkbox(
-        isChecked = isChecked,
-        onCheckedChange = { isChecked = it },
+        isChecked = true,
+        onClick = { },
     )
 }
 

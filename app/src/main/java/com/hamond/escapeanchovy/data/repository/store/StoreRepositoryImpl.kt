@@ -3,9 +3,7 @@ package com.hamond.escapeanchovy.data.repository.store
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hamond.escapeanchovy.constants.Collection.USER
 import com.hamond.escapeanchovy.data.model.User
-import com.hamond.escapeanchovy.utils.AccountUtils.hashPassword
-import com.kakao.sdk.auth.model.Prompt
-import com.kakao.sdk.user.UserApiClient
+import com.hamond.escapeanchovy.utils.AccountUtils.hashPw
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -41,13 +39,35 @@ class StoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun isLoginSuccess(email: String, password: String): Boolean {
+    override suspend fun isLoginSuccess(email: String, pw: String): Boolean {
         try {
             val query = store.collection(USER).whereEqualTo("email", email)
-                .whereEqualTo("password", hashPassword(password)).limit(1).get().await()
+                .whereEqualTo("pw", hashPw(pw)).limit(1).get().await()
             return !query.isEmpty
         } catch (e: Exception) {
             throw Exception("기본 로그인 에러: ${e.message}")
+        }
+    }
+
+    override suspend fun getEmailByName(name: String): String? {
+        try {
+            val query = store.collection(USER)
+                .whereEqualTo("name", name).limit(1).get().await()
+            val document = query.documents.firstOrNull()
+            return document?.getString("email")
+        } catch (e: Exception) {
+            throw Exception("이메일 찾기 오류: ${e.message}")
+        }
+    }
+
+    override suspend fun resetPwByEmail(email: String, pw: String) {
+        try {
+            val query = store.collection(USER)
+                .whereEqualTo("email", email).limit(1).get().await()
+            val document = query.documents.first()
+            document.reference.update("pw", pw).await()
+        } catch (e: Exception) {
+            throw Exception("비밀번호 재설정 오류: ${e.message}")
         }
     }
 }

@@ -13,10 +13,8 @@ import com.hamond.escapeanchovy.data.repository.googleLogin.GoogleLoginRepositor
 import com.hamond.escapeanchovy.data.repository.kakaoLogin.KakaoLoginRepository
 import com.hamond.escapeanchovy.data.repository.naverLogin.NaverLoginRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
-import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.state.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,9 +31,9 @@ class LoginViewModel @Inject constructor(
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
-    suspend fun login(email: String, password: String) {
+    suspend fun login(email: String, pw: String) {
         try {
-            val isLogin = storeRepository.isLoginSuccess(email, password)
+            val isLogin = storeRepository.isLoginSuccess(email, pw)
             if (isLogin) {
                 _loginState.value = LoginState.Success(email)
             } else {

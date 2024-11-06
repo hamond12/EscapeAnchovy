@@ -1,4 +1,4 @@
-package com.hamond.escapeanchovy.presentation.ui.screens.util
+package com.hamond.escapeanchovy.presentation.ui.screens.common
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -26,23 +26,17 @@ fun ContentResizingScreen(
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
     ) {
-        // 상단 스크롤 가능한 Column 영역
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(scrollState)
-        ) {
-            contentColumn()
-        }
+        ) { contentColumn() }
 
-        // 하단 Row 영역 (버튼 등 위치)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 28.dp, bottom = 28.dp),
             horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            bottomRow()
-        }
+        ) { bottomRow() }
     }
 }

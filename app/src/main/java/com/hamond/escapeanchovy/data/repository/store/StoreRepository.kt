@@ -7,4 +7,6 @@ interface StoreRepository {
     suspend fun isEmailDuplicate(email: String): Boolean
     suspend fun isNameDuplicate(name:String): Boolean
     suspend fun isLoginSuccess(email: String, password: String): Boolean
+    suspend fun getEmailByName(name: String): String?
+    suspend fun resetPwByEmail(email: String, pw: String)
 }

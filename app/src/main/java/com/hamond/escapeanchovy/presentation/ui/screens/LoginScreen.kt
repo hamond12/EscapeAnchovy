@@ -1,8 +1,8 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +34,7 @@ import com.hamond.escapeanchovy.R
 import com.hamond.escapeanchovy.constants.Routes
 import com.hamond.escapeanchovy.constants.Routes.HOME
 import com.hamond.escapeanchovy.constants.Routes.LOGIN
+import com.hamond.escapeanchovy.constants.Routes.RECOVERY
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveAutoLogin
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
 import com.hamond.escapeanchovy.presentation.ui.components.Button
@@ -50,9 +51,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(navController: NavHostController) {
 
-    // 화면 테마 별로 다른 svg 설정
-    val darkTheme = isSystemInDarkTheme()
-
     // 화면 높이가 모자란 경우를 대비
     val scrollState = rememberScrollState()
 
@@ -68,11 +66,14 @@ fun LoginScreen(navController: NavHostController) {
 
     // 사용자 입력값들
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var pw by remember { mutableStateOf("") }
 
     // 자동 로그인 여부 컨트롤 변수
     var isSocialLogin by remember { mutableStateOf(true) }
     var isAutoLogin by remember { mutableStateOf(false) }
+
+    // 로그인 버튼 활성화 조건 > 아이디 비번 입력
+    val loginEnable = email.isNotEmpty() && pw.isNotEmpty()
 
     // 로그인 상태별 동작 정의
     LaunchedEffect(Unit) {
@@ -104,17 +105,17 @@ fun LoginScreen(navController: NavHostController) {
                     }
                 }
 
-                // 비동기 작업 오류 발생 시
-                is LoginState.Error -> {
-                    // 디버깅을 위한 에러 로그 출력하기
-                    Log.e("Login", "${loginState.error}")
-                }
-
                 // 로그인 실패 시 (유저 정보 불일치)
                 is LoginState.Failure -> {
                     // 토스트 메시지를 띄워 사용자에게 로그인 실패를 알림
                     showToast(context, "로그인 정보가 일치하지 않습니다.")
                     loginViewModel.initLoginResult()
+                }
+
+                // 비동기 작업 오류 발생 시
+                is LoginState.Error -> {
+                    // 디버깅을 위한 에러 로그 출력하기
+                    Log.e("Login", "${loginState.error}")
                 }
             }
         }
@@ -134,54 +135,49 @@ fun LoginScreen(navController: NavHostController) {
                 .padding(start = 48.dp, end = 48.dp),
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Svg(
-                    drawableId = if (!darkTheme) R.drawable.logo else R.drawable.logo_dark,
-                    size = 92.dp
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "ESCAPE\nANCHOVY",
-                    style = CustomTheme.typography.h1Bold.copy(color = CustomTheme.colors.text)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }
+            LoginAppTitle()
             Spacer(modifier = Modifier.height(48.dp))
-            LoginEmailTextField(email = email, onValueChange = { email = it })
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                drawableId = R.drawable.ic_email,
+                hint = "이메일 입력",
+            )
             Spacer(modifier = Modifier.height(16.dp))
-            LoginPasswordTextField(password = password, onValueChange = { password = it })
+            TextField(
+                value = pw,
+                onValueChange = { pw = it },
+                drawableId = R.drawable.ic_pw,
+                hint = "비밀번호 입력",
+                isPassword = true,
+                isLast = true,
+                maxLength = 20
+            )
             Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AutoLoginCheckbox(isChecked = isAutoLogin, onCheckedChange = { isAutoLogin = it })
-                Column(horizontalAlignment = Alignment.End) {
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = "이메일 찾기 / 비밀번호 재설정",
-                        style = CustomTheme.typography.b4Regular.copy(
-                            color = CustomTheme.colors.subText,
-                        ),
-                    )
-                    Line(width = 140.dp, color = CustomTheme.colors.subText, topPadding = 2)
-                }
+                AutoLoginCheckbox(isChecked = isAutoLogin, onClick = { isAutoLogin = it })
+                RecoveryScreenRouteText(onClick = { navController.navigate(RECOVERY) })
             }
             Spacer(modifier = Modifier.height(40.dp))
-            LoginButton(
+            Button(
+                text = "로그인",
                 onClick = {
                     isSocialLogin = false
                     coroutineScope.launch {
-                        loginViewModel.login(email, password)
+                        loginViewModel.login(email, pw)
                     }
                 },
-                enabled = email.isNotBlank() && password.isNotBlank()
+                color = CustomTheme.colors.skyBlue,
+                enabled = loginEnable
             )
             Spacer(modifier = Modifier.height(20.dp))
-            SignUpButton(
+            Button(
+                text = "회원가입",
+                color = CustomTheme.colors.orange,
                 onClick = { navController.navigate(Routes.SIGN_UP) }
             )
         }
@@ -212,39 +208,34 @@ fun LoginScreen(navController: NavHostController) {
 }
 
 @Composable
-fun LoginEmailTextField(email: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = email,
-        onValueChange = { onValueChange(it) },
-        drawableId = R.drawable.ic_email,
-        hint = "이메일 입력",
-    )
+fun LoginAppTitle() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Svg(
+            drawableId = R.drawable.logo,
+            size = 92.dp
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "ESCAPE\nANCHOVY",
+            style = CustomTheme.typography.h1Bold.copy(
+                color = CustomTheme.colors.text
+            )
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+    }
 }
 
-@Composable
-fun LoginPasswordTextField(
-    password: String,
-    onValueChange: (String) -> Unit,
-) {
-    TextField(
-        value = password,
-        onValueChange = { onValueChange(it) },
-        drawableId = R.drawable.ic_password,
-        hint = "비밀번호 입력",
-        isPassword = true,
-        isLast = true,
-        maxLength = 20
-    )
-}
 
 @Composable
-fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun AutoLoginCheckbox(isChecked: Boolean, onClick: (Boolean) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             isChecked = isChecked,
-            onCheckedChange = { onCheckedChange(it) },
+            onClick = onClick,
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
@@ -255,22 +246,18 @@ fun AutoLoginCheckbox(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 }
 
 @Composable
-fun LoginButton(onClick: () -> Unit, enabled: Boolean) {
-    Button(
-        text = "로그인",
-        onClick = onClick,
-        background = CustomTheme.colors.skyBlue,
-        enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpButton(onClick: () -> Unit) {
-    Button(
-        text = "회원가입",
-        onClick = onClick,
-        background = CustomTheme.colors.orange
-    )
+fun RecoveryScreenRouteText(onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.End) {
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = "이메일 찾기 / 비밀번호 재설정",
+            modifier = Modifier.clickable { onClick.invoke() },
+            style = CustomTheme.typography.b4Regular.copy(
+                color = CustomTheme.colors.subText,
+            ),
+        )
+        Line(width = 140.dp, color = CustomTheme.colors.subText, topPadding = 2)
+    }
 }
 
 @Composable

@@ -37,7 +37,7 @@ fun OutlinedTextField(
     onValueChange: (String) -> Unit,
     hint: String,
     isPassword: Boolean = false,
-    isLast: Boolean = false,
+    isLastField: Boolean = false,
     maxLength: Int = 50,
     enabled: Boolean = true
 ) {
@@ -98,7 +98,7 @@ fun OutlinedTextField(
                 },
                 visualTransformation = visualTransformation,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = if (isLast) ImeAction.Done else ImeAction.Next
+                    imeAction = if (isLastField) ImeAction.Done else ImeAction.Next
                 ),
 
                 )

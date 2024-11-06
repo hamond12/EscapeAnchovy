@@ -1,9 +1,7 @@
 package com.hamond.escapeanchovy.presentation.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -15,17 +13,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hamond.escapeanchovy.constants.Routes.COMPLETE
-import com.hamond.escapeanchovy.constants.Routes.SIGN_UP
 import com.hamond.escapeanchovy.presentation.ui.components.Button
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedButton
 import com.hamond.escapeanchovy.presentation.ui.components.OutlinedTextField
-import com.hamond.escapeanchovy.presentation.ui.screens.util.ContentResizingScreen
+import com.hamond.escapeanchovy.presentation.ui.screens.common.ContentResizingScreen
+import com.hamond.escapeanchovy.presentation.ui.screens.common.TextAndValidation
+import com.hamond.escapeanchovy.presentation.ui.screens.common.TextFieldAndButton
 import com.hamond.escapeanchovy.presentation.ui.state.SignUpState
 import com.hamond.escapeanchovy.presentation.viewmodel.SignUpViewModel
 import com.hamond.escapeanchovy.ui.theme.CustomTheme
@@ -33,9 +31,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(navController: NavHostController) {
+
     // 뷰모델 관련 변수 선언
     val coroutineScope = rememberCoroutineScope()
     val signUpViewModel = hiltViewModel<SignUpViewModel>()
+
+    // 밸리데이션 메시지 선언
+    val emailValidation = signUpViewModel.emailValidation.value
+    val nameValidation = signUpViewModel.nameValidation.value
+    val pwValidation = signUpViewModel.pwValidation.value
+    val pwCheckValidation = signUpViewModel.pwCheckValidation.value
 
     // 비동기 작업 진행 여부
     var isEmailLoading by remember { mutableStateOf(false) }
@@ -48,16 +53,20 @@ fun SignUpScreen(navController: NavHostController) {
     // 사용자 입력값들
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordCheck by remember { mutableStateOf("") }
+    var pw by remember { mutableStateOf("") }
+    var pwCheck by remember { mutableStateOf("") }
 
     // 회원가입 버튼 활성화 조건
     val signUpEnable =
-        isEmailVerified && isNameVerified && password.isNotEmpty() && passwordCheck.isNotEmpty()
+        isEmailVerified && isNameVerified && pw.isNotEmpty() && pwCheck.isNotEmpty()
 
     // 회원가입 상태별 동작 정의
     LaunchedEffect(Unit) {
+
+        // 이메일 인증 요청을 보낸 후 가입 취소 버튼을 누르거나 이메일 인증을 완료하지 않았을 때
+        // 생성된 임시계정에 로그인하여 이메일 인증을 보내기 위해 생성한 임시계정을 제거한다.
         signUpViewModel.deleteTempAccount()
+
         signUpViewModel.signUpState.collect { signUpState ->
             when (signUpState) {
 
@@ -92,9 +101,9 @@ fun SignUpScreen(navController: NavHostController) {
 
                 // 회원가입 시
                 is SignUpState.SignUp -> {
-                    // 경로 인자를 회원가입으로 설정 후 완료 화면으로 라우팅
                     signUpViewModel.initSignUpResult()
-                    navController.navigate("$COMPLETE/sign_up")
+                    val route = "$COMPLETE/sign_up"
+                    navController.navigate(route)
                 }
 
                 // 에러 발생 시
@@ -107,228 +116,129 @@ fun SignUpScreen(navController: NavHostController) {
 
     ContentResizingScreen(contentColumn = {
         Spacer(modifier = Modifier.height(48.dp))
-        Text(
-            text = "회원가입",
-            style = CustomTheme.typography.h3Bold.copy(color = CustomTheme.colors.text)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "데이터 백업을 위해 회원가입을 진행해주세요.",
-            style = CustomTheme.typography.b2Regular.copy(color = CustomTheme.colors.subText)
-        )
+        SignUpTitleAndExplain()
         Spacer(modifier = Modifier.height(28.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "이메일",
-                style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            SignUpEmailValidationMessage(
-                text = signUpViewModel.emailValidation.value, isEmailVerified = isEmailVerified
-            )
-        }
+        TextAndValidation(
+            text = "이메일",
+            validation = emailValidation,
+            isVerified = isEmailVerified
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            Box(modifier = Modifier.weight(3f)) {
-                SignUpEmailTextField(
-                    email = email,
+        TextFieldAndButton(
+            textField = {
+                OutlinedTextField(
+                    value = email,
                     onValueChange = { email = it },
+                    hint = "이메일 입력",
+                    enabled = !isEmailLoading && !isEmailVerified
+                )
+            },
+            button = {
+                OutlinedButton(
+                    onClick = { coroutineScope.launch {
+                        signUpViewModel.emailValidationBtnAction(email)
+                    }},
+                    text = "인증 요청",
+                    color = CustomTheme.colors.skyBlue,
                     enabled = !isEmailLoading && !isEmailVerified
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Box(modifier = Modifier.weight(1f)) {
-                SignUpEmailValidationButton(
-                    onClick = {
-                        coroutineScope.launch { signUpViewModel.validateEmail(email) }
-                    }, enabled = !isEmailLoading && !isEmailVerified
-                )
-            }
-        }
+        )
         Spacer(modifier = Modifier.height(28.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "이름",
-                style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            SignUpNameValidationMessage(
-                text = signUpViewModel.nameValidation.value, isNameVerified = isNameVerified
-            )
-        }
+        TextAndValidation(
+            text = "이름",
+            validation = nameValidation,
+            isVerified = isNameVerified
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            Box(modifier = Modifier.weight(3f)) {
-                SignUpNameTextField(
-                    name = name,
+        TextFieldAndButton(
+            textField = {
+                OutlinedTextField(
+                    value = name,
                     onValueChange = { name = it },
+                    hint = "이름 입력 (10자 제한)",
+                    maxLength = 10,
+                    enabled = !isNameLoading && !isNameVerified,
+                )
+            },
+            button = {
+                OutlinedButton(
+                    onClick = { coroutineScope.launch { signUpViewModel.validateName(name) } },
+                    text = "중복 확인",
+                    color = CustomTheme.colors.orange,
                     enabled = !isNameLoading && !isNameVerified
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Box(modifier = Modifier.weight(1f)) {
-                SignUpNameDuplicateCheckButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            signUpViewModel.validateName(name)
-                        }
-                    }, enabled = !isNameLoading && !isNameVerified
-                )
-            }
-        }
+        )
         Spacer(modifier = Modifier.height(28.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "비밀번호",
-                style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            SignUpPasswordValidationMessage(text = signUpViewModel.passwordValidation.value)
-        }
+        TextAndValidation(
+            text = "비밀번호",
+            validation = pwValidation
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        SignUpPasswordTextField(password = password, onValueChange = { password = it })
+        OutlinedTextField(
+            value = pw,
+            onValueChange = { pw = it },
+            hint = "비밀번호 입력 (영문, 숫자, 특수문자 포함 8~20자)",
+            maxLength = 20,
+            isPassword = true
+        )
         Spacer(modifier = Modifier.height(28.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "비밀번호 확인",
-                style = CustomTheme.typography.b4Regular.copy(CustomTheme.colors.text)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            SignUpPasswordCheckValidationMessage(text = signUpViewModel.passwordCheckValidation.value)
-        }
+        TextAndValidation(
+            text = "비밀번호 확인",
+            validation = pwCheckValidation
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        SignUpPasswordCheckTextField(passwordCheck = passwordCheck,
-            onValueChange = { passwordCheck = it })
+        OutlinedTextField(
+            value = pwCheck,
+            onValueChange = { pwCheck = it },
+            hint = "비밀번호 재입력",
+            maxLength = 20,
+            isPassword = true,
+            isLastField = true
+        )
     }, bottomRow = {
         Box(modifier = Modifier.weight(1f)) {
-            SignUpCancelButton(onClick = {
-                signUpViewModel.deleteTempAccount()
-                navController.popBackStack()
-            })
+            Button(
+                text = "가입 취소",
+                onClick = {
+                    signUpViewModel.deleteTempAccount()
+                    navController.popBackStack()
+                },
+                color = CustomTheme.colors.orange
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Box(modifier = Modifier.weight(1f)) {
-            SignUpSubmitButton(
+            Button(
+                text = "회원가입",
                 onClick = {
                     coroutineScope.launch {
                         signUpViewModel.signUpSubmitBtnAction(
                             email = email,
                             name = name,
-                            password = password,
-                            passwordCheck = passwordCheck
+                            pw = pw,
+                            pwCheck = pwCheck
                         )
                     }
-                }, enabled = signUpEnable
+                },
+                color = CustomTheme.colors.skyBlue,
+                enabled = signUpEnable
             )
         }
     })
 }
 
 @Composable
-fun SignUpEmailValidationMessage(text: String, isEmailVerified: Boolean) {
-    val colors = CustomTheme.colors
-    val textColor = if (isEmailVerified) colors.check else colors.error
+fun SignUpTitleAndExplain() {
     Text(
-        text = text, style = CustomTheme.typography.caption1.copy(color = textColor)
+        text = "회원가입",
+        style = CustomTheme.typography.h3Bold.copy(color = CustomTheme.colors.text)
     )
-}
-
-@Composable
-fun SignUpEmailTextField(email: String, onValueChange: (String) -> Unit, enabled: Boolean) {
-    OutlinedTextField(
-        value = email, onValueChange = { onValueChange(it) }, hint = "이메일 입력", enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpEmailValidationButton(onClick: () -> Unit, enabled: Boolean) {
-    OutlinedButton(
-        onClick = onClick, text = "인증 요청", color = CustomTheme.colors.skyBlue, enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpNameValidationMessage(text: String, isNameVerified: Boolean) {
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
-        text = text, style = CustomTheme.typography.caption1.copy(
-            color = if (isNameVerified) CustomTheme.colors.check else CustomTheme.colors.error
-        )
+        text = "데이터 백업을 위해 회원가입을 진행해주세요.",
+        style = CustomTheme.typography.b2Regular.copy(color = CustomTheme.colors.subText)
     )
 }
-
-@Composable
-fun SignUpNameTextField(name: String, onValueChange: (String) -> Unit, enabled: Boolean) {
-    OutlinedTextField(
-        value = name,
-        onValueChange = { onValueChange(it) },
-        maxLength = 10,
-        hint = "이름 입력 (10자 제한)",
-        enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpNameDuplicateCheckButton(onClick: () -> Unit, enabled: Boolean) {
-    OutlinedButton(
-        onClick = onClick, text = "중복 확인", color = CustomTheme.colors.orange, enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpPasswordValidationMessage(text: String) {
-    Text(
-        text = text, style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
-    )
-}
-
-@Composable
-fun SignUpPasswordTextField(password: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = password,
-        onValueChange = { onValueChange(it) },
-        hint = "비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)",
-        isPassword = true
-    )
-}
-
-@Composable
-fun SignUpPasswordCheckValidationMessage(text: String) {
-    Text(
-        text = text, style = CustomTheme.typography.caption1.copy(color = CustomTheme.colors.error)
-    )
-}
-
-@Composable
-fun SignUpPasswordCheckTextField(passwordCheck: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = passwordCheck,
-        onValueChange = { onValueChange(it) },
-        hint = "비밀번호 재입력 ",
-        isPassword = true,
-        isLast = true
-    )
-}
-
-@Composable
-fun SignUpSubmitButton(onClick: () -> Unit, enabled: Boolean) {
-    Button(
-        text = "회원가입", onClick = onClick, background = CustomTheme.colors.skyBlue, enabled = enabled
-    )
-}
-
-@Composable
-fun SignUpCancelButton(onClick: () -> Unit) {
-    Button(
-        text = "가입 취소", onClick = onClick, background = CustomTheme.colors.orange
-    )
-}
-
 

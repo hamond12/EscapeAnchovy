@@ -30,7 +30,7 @@ fun EscapeAnchovyTheme(
         LocalTypography provides typography
     ) {
         ProvideTextStyle(
-            typography.b4Regular,
+            typography.b4Regular.copy(color = CustomTheme.colors.text),
             content = content
         )
     }

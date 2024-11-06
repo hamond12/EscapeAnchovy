@@ -5,16 +5,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hamond.escapeanchovy.data.model.User
 import com.hamond.escapeanchovy.data.repository.auth.AuthRepository
 import com.hamond.escapeanchovy.data.repository.store.StoreRepository
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.getUserEmail
 import com.hamond.escapeanchovy.data.source.local.AccountDataSource.saveUserEmail
-import com.hamond.escapeanchovy.presentation.ui.state.SignUpState
+import com.hamond.escapeanchovy.presentation.ui.state.RecoveryState
 import com.hamond.escapeanchovy.utils.AccountUtils.formatTime
 import com.hamond.escapeanchovy.utils.AccountUtils.hashPw
 import com.hamond.escapeanchovy.utils.AccountUtils.isValidEmail
-import com.hamond.escapeanchovy.utils.AccountUtils.isValidName
 import com.hamond.escapeanchovy.utils.AccountUtils.isValidPw
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,20 +24,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor(
+class RecoveryViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authRepository: AuthRepository,
     private val storeRepository: StoreRepository
 ) : ViewModel() {
 
-    private val _signUpState = MutableStateFlow<SignUpState>(SignUpState.Init)
-    val signUpState: StateFlow<SignUpState> = _signUpState.asStateFlow()
+    private val _recoveryState = MutableStateFlow<RecoveryState>(RecoveryState.Init)
+    val recoveryState: StateFlow<RecoveryState> = _recoveryState.asStateFlow()
+
+    private val _userName = mutableStateOf("")
+    val userName: State<String> = _userName
+
+    private val _userEmail = mutableStateOf("")
+    val userEmail: State<String> = _userEmail
 
     private val _emailValidation = mutableStateOf("")
     val emailValidation: State<String> = _emailValidation
-
-    private val _nameValidation = mutableStateOf("")
-    val nameValidation: State<String> = _nameValidation
 
     private val _pwValidation = mutableStateOf("")
     val pwValidation: State<String> = _pwValidation
@@ -48,12 +49,11 @@ class SignUpViewModel @Inject constructor(
     val pwCheckValidation: State<String> = _pwCheckValidation
 
     private val maxTime = 180
-
+    private var timerRun = false
     private var isEmailVerified = false
-    private var isNameVerified = false
 
-    private var isPasswordValid = false
-    private var isPasswordCheckValid = false
+    private var isPwValid = false
+    private var isPwCheckValid = false
 
     suspend fun emailValidationBtnAction(email: String) {
         when {
@@ -66,26 +66,26 @@ class SignUpViewModel @Inject constructor(
             }
 
             isValidEmail(email) -> {
-                _signUpState.value = SignUpState.EmailLoading
-                checkEmailDuplicated(email)
+                _recoveryState.value = RecoveryState.EmailLoading
+                checkEmailAccount(email)
             }
         }
     }
 
-    private suspend fun checkEmailDuplicated(email: String) {
+    private suspend fun checkEmailAccount(email: String) {
         try {
             val isEmailDuplicated = storeRepository.isEmailDuplicate(email)
-            if (!isEmailDuplicated) {
+            if (isEmailDuplicated) {
                 _emailValidation.value = "이메일 인증 요청을 보내는 중입니다."
                 sendEmailVerification(email)
                 saveUserEmail(context, email)
                 checkEmailVerification()
             } else {
-                _signUpState.value = SignUpState.Init
-                _emailValidation.value = "이미 사용 중인 이메일입니다."
+                _recoveryState.value = RecoveryState.Init
+                _emailValidation.value = "등록된 계정을 찾을 수 없습니다."
             }
         } catch (e: Exception) {
-            _signUpState.value = SignUpState.Error(e.message)
+            _recoveryState.value = RecoveryState.Error(e.message)
         }
     }
 
@@ -99,7 +99,7 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             val timer = launch {
                 val startTime = System.currentTimeMillis()
-                var timerRun = true
+                timerRun = true
 
                 while (timerRun) {
                     val currentTime = System.currentTimeMillis()
@@ -133,84 +133,63 @@ class SignUpViewModel @Inject constructor(
             timer.join()
 
             if (isEmailVerified) {
-                _signUpState.value = SignUpState.EmailVerified
+                _recoveryState.value = RecoveryState.EmailVerified
                 _emailValidation.value = "이메일 인증이 완료되었습니다."
             }
         }
     }
 
-    suspend fun validateName(name: String) {
-        when {
-            name.isBlank() -> {
-                _nameValidation.value = "이름을 입력해주세요."
-            }
-
-            !isValidName(name) -> {
-                _nameValidation.value = "이름엔 특수문자를 포함할 수 없습니다."
-            }
-
-            else -> {
-                _signUpState.value = SignUpState.NameLoading
-                checkNameDuplicated(name)
-            }
-        }
-    }
-
-    private suspend fun checkNameDuplicated(name: String) {
+    suspend fun findEmailBtnAction(name: String) {
         try {
-            val isNameDuplicated = storeRepository.isNameDuplicate(name)
-
-            if (isNameDuplicated) {
-                _signUpState.value = SignUpState.Init
-                _nameValidation.value = "이미 사용 중인 이름입니다."
+            val email = storeRepository.getEmailByName(name)
+            if (email != null) {
+                _userName.value = name
+                _userEmail.value = email
+                _recoveryState.value = RecoveryState.FindEmail
             } else {
-                _signUpState.value = SignUpState.NameVerified
-                _nameValidation.value = "사용 가능한 이름입니다."
-                isNameVerified = true
+                _recoveryState.value = RecoveryState.Failure
             }
         } catch (e: Exception) {
-            _signUpState.value = SignUpState.Error(e.message)
+            _recoveryState.value = RecoveryState.Error(e.message)
         }
     }
 
-    suspend fun signUpSubmitBtnAction(
+    suspend fun resetPwBtnAction(
         email: String,
-        name: String,
         pw: String,
         pwCheck: String
     ) {
-        if (isEmailVerified && isNameVerified) {
+        if (isEmailVerified) {
             if (pw.isEmpty()) {
                 _pwValidation.value = "비밀번호를 입력해 주세요."
             } else if (!isValidPw(pw)) {
                 _pwValidation.value = "비밀번호 형식이 올바르지 않습니다."
             } else {
                 _pwValidation.value = ""
-                isPasswordValid = true
+                isPwValid = true
             }
         }
 
-        if (isEmailVerified && isNameVerified && isPasswordValid) {
+        if (isEmailVerified && isPwValid) {
             if (pw != pwCheck) {
                 _pwCheckValidation.value = "비밀번호가 일치하지 않습니다."
             } else {
                 _pwCheckValidation.value = ""
-                isPasswordCheckValid = true
+                isPwCheckValid = true
             }
         }
 
-        if (isEmailVerified && isNameVerified && isPasswordValid && isPasswordCheckValid) {
-            val user = User(email, name, hashPw(pw))
-            saveAccountInfo(user)
-            _signUpState.value = SignUpState.SignUp
+        if (isEmailVerified && isPwValid && isPwCheckValid) {
+            resetPw(email, pw)
+            _recoveryState.value = RecoveryState.ResetPw
         }
     }
 
-    private suspend fun saveAccountInfo(user: User) {
+    private suspend fun resetPw(email: String, pw: String){
         try {
-            storeRepository.saveAccountInfo(user)
-        } catch (e: Exception) {
-            _signUpState.value = SignUpState.Error(e.message)
+            storeRepository.resetPwByEmail(email, hashPw(pw))
+        }catch (e:Exception){
+            _recoveryState.value = RecoveryState.Error(e.message)
         }
     }
 
@@ -221,12 +200,20 @@ class SignUpViewModel @Inject constructor(
                 authRepository.loginTempAccount(inputEmail)
                 authRepository.deleteTempAccount()
             } catch (e: Exception) {
-                _signUpState.value = SignUpState.Error(e.message)
+                _recoveryState.value = RecoveryState.Error(e.message)
             }
         }
     }
 
-    fun initSignUpResult() {
-        _signUpState.value = SignUpState.Init
+    fun initRecoveryState(){
+        _recoveryState.value = RecoveryState.Init
+        timerRun = false
+        _emailValidation.value = ""
+        _pwValidation.value = ""
+        _pwCheckValidation.value = ""
+    }
+
+    fun initRecoveryResult() {
+        _recoveryState.value = RecoveryState.Init
     }
 }
