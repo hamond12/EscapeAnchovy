@@ -130,9 +130,10 @@ fun RecoveryScreen(navController: NavHostController, recoveryViewModel: Recovery
         }
     }
 
-    // 화면을 떠날 때 뷰모델의 모든 상태 초기화
+    // 화면을 떠날 때
     DisposableEffect(navController){
         onDispose {
+            recoveryViewModel.deleteTempAccount()
             recoveryViewModel.initRecoveryState()
         }
     }
@@ -248,7 +249,6 @@ fun RecoveryScreen(navController: NavHostController, recoveryViewModel: Recovery
                 Button(
                     text = "돌아가기",
                     onClick = {
-                        recoveryViewModel.deleteTempAccount()
                         navController.navigate(LOGIN) {
                             popUpTo(RECOVERY) { inclusive = true }
                         }

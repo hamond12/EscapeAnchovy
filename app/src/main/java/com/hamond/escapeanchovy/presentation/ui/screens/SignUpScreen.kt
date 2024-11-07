@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,6 +115,12 @@ fun SignUpScreen(navController: NavHostController) {
         }
     }
 
+    DisposableEffect(navController){
+        onDispose {
+            signUpViewModel.deleteTempAccount()
+        }
+    }
+
     ContentResizingScreen(contentColumn = {
         Spacer(modifier = Modifier.height(48.dp))
         SignUpTitleAndExplain()
@@ -201,10 +208,7 @@ fun SignUpScreen(navController: NavHostController) {
         Box(modifier = Modifier.weight(1f)) {
             Button(
                 text = "가입 취소",
-                onClick = {
-                    signUpViewModel.deleteTempAccount()
-                    navController.popBackStack()
-                },
+                onClick = { navController.popBackStack() },
                 color = CustomTheme.colors.orange
             )
         }
