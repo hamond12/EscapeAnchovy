@@ -27,8 +27,6 @@ fun Svg(
     isIcon:Boolean = false,
     iconColor: Color = CustomTheme.colors.icon
 ) {
-    val darkTheme = isSystemInDarkTheme()
-
     CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         Image(
             imageVector = ImageVector.vectorResource(drawableId),

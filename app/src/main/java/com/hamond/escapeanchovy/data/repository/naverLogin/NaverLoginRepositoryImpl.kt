@@ -3,10 +3,10 @@ package com.hamond.escapeanchovy.data.repository.naverLogin
 import android.content.Context
 import com.hamond.escapeanchovy.data.model.User
 import com.navercorp.nid.NaverIdLoginSDK
-import com.navercorp.nid.oauth.NidOAuthPreferencesManager.accessToken
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -16,7 +16,6 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import okhttp3.Callback
 
 class NaverLoginRepositoryImpl @Inject constructor() : NaverLoginRepository {
 
@@ -32,7 +31,7 @@ class NaverLoginRepositoryImpl @Inject constructor() : NaverLoginRepository {
                     val errorCode = NaverIdLoginSDK.getLastErrorCode().code
                     val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
                     continuation.resumeWithException(
-                        Exception("errorCode:$errorCode, errorDesc:$errorDescription")
+                        Exception("에러 코드:$errorCode, 에러 내용:$errorDescription")
                     )
                 }
 
@@ -57,17 +56,19 @@ class NaverLoginRepositoryImpl @Inject constructor() : NaverLoginRepository {
             client.newCall(request).enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
                     val responseBody = response.body?.string()
-                    val jsonObject = JSONObject(responseBody)
-                    if (jsonObject.getString("resultcode") == "00") {
-                        val user = jsonObject.getJSONObject("response")
-                        val email = user.getString("email")
-                        val name = user.getString("name")
-                        continuation.resume(User(email, name, ""))
+                    responseBody?.let {
+                        val jsonObject = JSONObject(responseBody)
+                        if (jsonObject.getString("resultcode") == "00") {
+                            val user = jsonObject.getJSONObject("response")
+                            val email = user.getString("email")
+                            val name = user.getString("name")
+                            continuation.resume(User(email, name, ""))
+                        }
                     }
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
-                    continuation.resumeWithException(Exception("Error fetching user info: ${e.message}"))
+                    continuation.resumeWithException(Exception("네이버 유저 정보 가져오기 실패: ${e.message}"))
                 }
             })
 

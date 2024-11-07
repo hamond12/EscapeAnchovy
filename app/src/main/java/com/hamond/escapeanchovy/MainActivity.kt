@@ -35,8 +35,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val darkTheme = isSystemInDarkTheme()
-            window.decorView.setBackgroundResource(if (!darkTheme) R.color.light else R.color.dark)
+            val keyboardBackDropColor = if (!isSystemInDarkTheme()) R.color.light else R.color.dark
+            window.decorView.setBackgroundResource(keyboardBackDropColor)
             EscapeAnchovyTheme {
                 Surface(color = CustomTheme.colors.background) {
                     MyApp()
